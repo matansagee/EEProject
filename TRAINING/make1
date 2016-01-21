@@ -1,0 +1,8 @@
+# build an executable named my prog from myprog.c
+
+all: hellopi
+
+	gcc -g -Wall -o hellopi hellopi.c
+
+clean:
+	$(RM) hellopi
