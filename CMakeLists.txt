@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.3)
+cmake_minimum_required(VERSION 3.0.2)
 project(EEProject)
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 # Use the package PkgConfig to detect GTK+ headers/library files
@@ -11,7 +11,7 @@ link_directories(${GTK3_LIBRARY_DIRS})
 # Add other flags to the compiler
 add_definitions(${GTK3_CFLAGS_OTHER})
 
-set(SOURCE_FILES main.c)
+set(SOURCE_FILES main.c TRAINING/gpio_test.c)
 add_executable(EEProject ${SOURCE_FILES})
 
 # Link the target to the GTK+ libraries
