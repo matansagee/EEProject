@@ -13,6 +13,6 @@ add_definitions(${GTK3_CFLAGS_OTHER})
 
 set(SOURCE_FILES main.c TRAINING/gpio_test.c)
 add_executable(EEProject ${SOURCE_FILES})
-
+set(EXECUTABLE_OUTPUT_PATH /home/pi/EEProject)
 # Link the target to the GTK+ libraries
 target_link_libraries(EEProject ${GTK3_LIBRARIES})
