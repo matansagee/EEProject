@@ -14,7 +14,7 @@ const int pwmValue = 75; // LED brightness
 
 int main(void)
 {
-wiringPiSetup();
+//wiringPiSetup();
 wiringPiSetupGpio();  //Initialize wiringPi using the broadcom GPIO pin numbers
 
 pinMode (pwmPin, PWM_OUTPUT);
