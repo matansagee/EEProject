@@ -18,7 +18,7 @@ pinMode (device_3, OUTPUT);
 
 }
 
-int StartDevicemain(int device_num)
+int StartDevice(int device_num)
 {
  
   switch (device_num)
@@ -54,7 +54,7 @@ int StartDevicemain(int device_num)
   }
 }
 
-int StopDevicemain(int device_num)
+int StopDevice(int device_num)
 {
  
   switch (device_num) 
