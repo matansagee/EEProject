@@ -1,0 +1,5 @@
+# Smart House application
+
+> using 2 raspberry pi2
+> control 4 devices
+> stream audio from the remote client [mic] to the application raspberry pi [speaker]
