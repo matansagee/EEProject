@@ -12,6 +12,6 @@ link_directories(${GTK3_LIBRARY_DIRS})
 add_definitions(${GTK3_CFLAGS_OTHER})
 set(SOURCE_FILES Application/main.c)
 add_executable(EEProject ${SOURCE_FILES})
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "/home/matan/ClionProjects/EEProject/Application")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "/EEProject/Application")
 # Link the target to the GTK+ libraries
 target_link_libraries(EEProject ${GTK3_LIBRARIES})
