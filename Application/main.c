@@ -1,9 +1,8 @@
 //
 // Created by matan on 04/01/16.
 //
-#include<stdio.h>
+#include <stdio.h>
 #include <glib.h>
-#include <pulse/pulseaudio.h>
 #include <gtk/gtk.h>
 #include <time.h>
 #include <math.h>
