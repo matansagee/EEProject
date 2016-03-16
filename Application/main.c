@@ -7,6 +7,7 @@
 #include <time.h>
 #include <math.h>
 
+#include "connection.h"
 static void
 print_hello (GtkWidget *widget,  gpointer   data)
 {
@@ -35,6 +36,8 @@ void connect_function(GtkWidget *widget,gpointer data)
     else{
         gtk_button_set_label(widget, "Connect");
     }
+    connect_to_client();
+
 }
 gboolean
 update_clock(gpointer label)
