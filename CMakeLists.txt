@@ -21,6 +21,7 @@ set(SOURCE_FILES Application/main.c)
 #add_library(MyLib )
 add_executable(app Application/main.c Application/connection.h Application/connection.c)
 add_executable(client Client/client.c)
+add_executable(server Server/server.c)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "Application")
 # Link the target to the GTK+ libraries
 target_link_libraries(app ${GTK3_LIBRARIES})
