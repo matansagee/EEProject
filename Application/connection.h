@@ -5,6 +5,14 @@
 #ifndef EEPROJECT_CONNECTION_H
 #define EEPROJECT_CONNECTION_H
 
-void connect_to_client();
+
+
+#define MAX_CHARACTERS_IN_STRING 256
+
+int connect_to_client();
+int disconnect();
+void sendMessage(char* message);
+char* recvMessage();
+//GSocketClient* gconnect();
 
 #endif //EEPROJECT_CONNECTION_H

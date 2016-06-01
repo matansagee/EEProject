@@ -6,8 +6,11 @@
 #include <gtk/gtk.h>
 #include <time.h>
 #include <math.h>
+#include <gst/gst.h>
 
 #include "connection.h"
+#include "audio.h"
+
 static void
 print_hello (GtkWidget *widget,  gpointer   data)
 {
@@ -26,7 +29,10 @@ print_hello (GtkWidget *widget,  gpointer   data)
     printf("%d %d %d\n",seconds,minutes,hours);
 
 }
-
+void play_function(GtkWidget *widget,gpointer data)
+{
+    play_audio_from_mic();
+}
 void connect_function(GtkWidget *widget,gpointer data)
 {
     char* current_string = gtk_button_get_label(widget);
@@ -143,6 +149,7 @@ activate (GtkApplication *app,    gpointer        user_data)
 //    gtk_grid_attach (GTK_GRID (grid), spinButtonDevice1, 0, 4, 1, 1);
     g_signal_connect_swapped (buttonClose, "clicked", G_CALLBACK (gtk_widget_destroy), window);
     g_signal_connect (buttonConnect, "clicked", G_CALLBACK (connect_function), NULL);
+    g_signal_connect (buttonPlay, "clicked", G_CALLBACK (play_function), NULL);
 
     gtk_container_add (GTK_CONTAINER (window), grid);
 
@@ -154,6 +161,7 @@ activate (GtkApplication *app,    gpointer        user_data)
 int
 main (int    argc, char **argv)
 {
+    gst_init(&argc,&argv);
     GtkApplication *app;
     int status;
 
