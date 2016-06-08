@@ -12,7 +12,7 @@
 #include "audio.h"
 
 static void
-print_hello (GtkWidget *widget,  gpointer   data)
+spin_button_device1(GtkWidget *widget, gpointer data)
 {
     int value = gtk_spin_button_get_value_as_int(widget);
     g_print ("new value - %d \n",value);
@@ -33,6 +33,12 @@ void play_function(GtkWidget *widget,gpointer data)
 {
     play_audio_from_mic();
 }
+
+void stop_function(GtkWidget *widget,gpointer data)
+{
+    stop_audio_from_mic();
+}
+
 void connect_function(GtkWidget *widget,gpointer data)
 {
     char* current_string = gtk_button_get_label(widget);
@@ -69,6 +75,7 @@ update_clock(gpointer label)
     return TRUE;
 }
 
+
 static void
 activate (GtkApplication *app,    gpointer        user_data)
 {
@@ -85,7 +92,10 @@ activate (GtkApplication *app,    gpointer        user_data)
     GtkWidget *spinButtonDevice2;
     GtkWidget *spinButtonDevice3;
     GtkWidget *spinButtonDevice4;
-    GtkWidget *adjustment;
+    GtkWidget *adjustment1;
+    GtkWidget *adjustment2;
+    GtkWidget *adjustment3;
+    GtkWidget *adjustment4;
     GtkWidget *label;
     GtkWidget *buttonClose;
     GtkWidget *clockLabel;
@@ -108,14 +118,17 @@ activate (GtkApplication *app,    gpointer        user_data)
     label = gtk_label_new ("Choose a number");
 
     /* Create an adjustment representing an adjustable bounded value */
-    adjustment = gtk_adjustment_new (0, 0, 100, 1, 0, 0);
+    adjustment1 = gtk_adjustment_new (0, 0, 100, 1, 0, 0);
+    adjustment2 = gtk_adjustment_new (0, 0, 100, 1, 0, 0);
+    adjustment3 = gtk_adjustment_new (0, 0, 100, 1, 0, 0);
+    adjustment4 = gtk_adjustment_new (0, 0, 100, 1, 0, 0);
 
 
     /* Create a spin button that is to be as wide as possible */
-    spinButtonDevice1 = gtk_spin_button_new (adjustment, 1, 0);
-    spinButtonDevice2 = gtk_spin_button_new (adjustment, 1, 0);
-    spinButtonDevice3 = gtk_spin_button_new (adjustment, 1, 0);
-    spinButtonDevice4 = gtk_spin_button_new (adjustment, 1, 0);
+    spinButtonDevice1 = gtk_spin_button_new (adjustment1, 1, 0);
+    spinButtonDevice2 = gtk_spin_button_new (adjustment2, 1, 0);
+    spinButtonDevice3 = gtk_spin_button_new (adjustment3, 1, 0);
+    spinButtonDevice4 = gtk_spin_button_new (adjustment4, 1, 0);
     gtk_widget_set_hexpand (spinButtonDevice1, TRUE);
     gtk_widget_set_hexpand (spinButtonDevice2, TRUE);
     gtk_widget_set_hexpand (spinButtonDevice3, TRUE);
@@ -124,10 +137,6 @@ activate (GtkApplication *app,    gpointer        user_data)
     /* Connecting the "value-changed" signal for the spinbutton
      * to the appropriate callback function.
      */
-    g_signal_connect (spinButtonDevice1,
-                      "value-changed",
-                      G_CALLBACK (print_hello),
-                      label);
 
 
     grid = gtk_grid_new();
@@ -144,12 +153,14 @@ activate (GtkApplication *app,    gpointer        user_data)
     gtk_grid_attach (GTK_GRID (grid), spinButtonDevice4, 1, 5, 1, 1);
     gtk_grid_attach (GTK_GRID (grid),buttonClose,0,6,2,1);
     gtk_grid_attach(GTK_GRID (grid),clockLabel,0,7,2,1);
-//    gtk_grid_attach (GTK_GRID (grid),buttonDevice3,0,3,1,1);
-//    gtk_grid_attach_next_to(GTK_GRID (grid),buttonDevice4,buttonDevice3,GTK_POS_RIGHT,1,1);
-//    gtk_grid_attach (GTK_GRID (grid), spinButtonDevice1, 0, 4, 1, 1);
+
+    g_signal_connect (buttonClose, "clicked", G_CALLBACK (stop_function), NULL);
     g_signal_connect_swapped (buttonClose, "clicked", G_CALLBACK (gtk_widget_destroy), window);
+
     g_signal_connect (buttonConnect, "clicked", G_CALLBACK (connect_function), NULL);
     g_signal_connect (buttonPlay, "clicked", G_CALLBACK (play_function), NULL);
+    g_signal_connect (buttonStop, "clicked", G_CALLBACK (stop_function), NULL);
+    g_signal_connect (spinButtonDevice1,"value-changed", G_CALLBACK(spin_button_device1),NULL);
 
     gtk_container_add (GTK_CONTAINER (window), grid);
 
@@ -165,7 +176,7 @@ main (int    argc, char **argv)
     GtkApplication *app;
     int status;
 
-    app = gtk_application_new ("org.gtk.example", G_APPLICATION_FLAGS_NONE);
+    app = gtk_application_new ("smart.house", G_APPLICATION_FLAGS_NONE);
     g_signal_connect (app, "activate", G_CALLBACK (activate), NULL);
     status = g_application_run (G_APPLICATION (app), argc, argv);
     g_object_unref (app);

@@ -1,6 +1,11 @@
 #include <gst/gst.h>
 #include <glib.h>
 #include "audio.h"
+#include<stdio.h>
+
+
+GstElement *pipeline, *source, *sink;
+GMainLoop *loop;
 
 static gboolean
 bus_call (GstBus     *bus,
@@ -39,9 +44,7 @@ bus_call (GstBus     *bus,
 
 void create_loop()
 {
-    GMainLoop *loop;
 
-    GstElement *pipeline, *source, *sink;
     GstBus *bus;
     guint bus_watch_id;
 
@@ -82,6 +85,7 @@ void create_loop()
 
 /* Out of the main loop, clean up nicely */
     g_print ("Returned, stopping playback\n");
+    printf ("Returned, stopping playback\n");
     gst_element_set_state (pipeline, GST_STATE_NULL);
 
     g_print ("Deleting pipeline\n");
@@ -94,3 +98,23 @@ void create_loop()
 void play_audio_from_mic() {
     create_loop();
 }
+
+void stop_audio_from_mic(){
+    g_main_loop_quit (loop);
+}
+
+void print_status_of_all(){}
+//{
+//    auto it  = gst_bin_iterate_elements(GST_BIN(_pipeline.raw()));
+//    GValue value = G_VALUE_INIT;
+//    for(GstIteratorResult r = gst_iterator_next(it, &value); r != GST_ITERATOR_DONE; r = gst_iterator_next(it, &value))
+//    {
+//        if ( r == GST_ITERATOR_OK )
+//        {
+//            GstElement *e = static_cast<GstElement*>(g_value_peek_pointer(&value));
+//            GstState  current, pending;
+//            auto ret = gst_element_get_state(e, &current, &pending, 100000);
+//            g_print("%s(%s), status = %s, pending = %s\n", G_VALUE_TYPE_NAME(&value), gst_element_get_name(e), gst_element_state_get_name(current), gst_element_state_get_name(pending));
+//        }
+//    }
+//}
