@@ -4,7 +4,7 @@
 #include<stdio.h>
 
 
-GstElement *pipeline, *source, *sink;
+GstElement *pipeline, *alsasrc , *mulawenc ,*rtppcmupay ,*udpsink;
 GMainLoop *loop;
 
 static gboolean
@@ -49,41 +49,40 @@ void create_loop()
     guint bus_watch_id;
 
     /* Initialisation */
-
     loop = g_main_loop_new (NULL, FALSE);
-
-
 
     /* Create gstreamer elements */
     pipeline = gst_pipeline_new ("audio-player");
-    source   = gst_element_factory_make ("alsasrc",       "alsa-source");
-    sink     = gst_element_factory_make ("autoaudiosink", "audio-output");
+    alsasrc   = gst_element_factory_make ("alsasrc","alsasrc");
+    mulawenc   = gst_element_factory_make ("mulawenc","mulawenc");
+    rtppcmupay   = gst_element_factory_make ("rtppcmupay","rtppcmupay");
+    udpsink   = gst_element_factory_make ("udpsink","udpsink");
 
-    if (!pipeline || !source  || !sink) {
+    if (!pipeline || !alsasrc || !mulawenc || !rtppcmupay || !udpsink) {
         g_printerr ("One element could not be created. Exiting.\n");
         return;
     }
 
-    g_object_set (G_OBJECT(source),"device","hw:1,0",NULL);
+    g_object_set(G_OBJECT(udpsink), "host", "127.0.0.1", NULL);
+    g_object_set(G_OBJECT(udpsink), "port", 5600, NULL);
 
-/* we add a message handler */
+
+    /* we add a message handler */
     bus = gst_pipeline_get_bus (GST_PIPELINE (pipeline));
     bus_watch_id = gst_bus_add_watch (bus, bus_call, loop);
     gst_object_unref (bus);
 
-    gst_bin_add_many (GST_BIN (pipeline),
-                      source,  sink, NULL);
-
-    gst_element_link (source, sink);
+    gst_bin_add_many (GST_BIN (pipeline), alsasrc,mulawenc,rtppcmupay,udpsink, NULL);
+    gst_element_link_many (alsasrc,mulawenc,rtppcmupay,udpsink, NULL);
     gst_element_set_state (pipeline, GST_STATE_PLAYING);
 
 
-/* Iterate */
+    /* Iterate */
     g_print ("Running...\n");
     g_main_loop_run (loop);
 
 
-/* Out of the main loop, clean up nicely */
+    /* Out of the main loop, clean up nicely */
     g_print ("Returned, stopping playback\n");
     printf ("Returned, stopping playback\n");
     gst_element_set_state (pipeline, GST_STATE_NULL);
@@ -102,19 +101,3 @@ void play_audio_from_mic() {
 void stop_audio_from_mic(){
     g_main_loop_quit (loop);
 }
-
-void print_status_of_all(){}
-//{
-//    auto it  = gst_bin_iterate_elements(GST_BIN(_pipeline.raw()));
-//    GValue value = G_VALUE_INIT;
-//    for(GstIteratorResult r = gst_iterator_next(it, &value); r != GST_ITERATOR_DONE; r = gst_iterator_next(it, &value))
-//    {
-//        if ( r == GST_ITERATOR_OK )
-//        {
-//            GstElement *e = static_cast<GstElement*>(g_value_peek_pointer(&value));
-//            GstState  current, pending;
-//            auto ret = gst_element_get_state(e, &current, &pending, 100000);
-//            g_print("%s(%s), status = %s, pending = %s\n", G_VALUE_TYPE_NAME(&value), gst_element_get_name(e), gst_element_state_get_name(current), gst_element_state_get_name(pending));
-//        }
-//    }
-//}
