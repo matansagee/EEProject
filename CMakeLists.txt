@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 2.8)
 project(EEProject)
 ENABLE_LANGUAGE(C)
 INCLUDE (CheckSymbolExists)
+find_package (Threads)
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 # Use the package PkgConfig to detect GTK+ headers/library files
 find_package(PkgConfig REQUIRED)
@@ -31,5 +32,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "Application")
 # Link the target to the GTK+ libraries
 target_link_libraries(app ${GTK3_LIBRARIES})
 target_link_libraries(app ${GSTREAMER_LIBRARIES})
+target_link_libraries (server ${CMAKE_THREAD_LIBS_INIT})
+
 #target_link_libraries(app MyLib)
 #target_link_libraries(client MyLib)
