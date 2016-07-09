@@ -31,11 +31,13 @@ spin_button_device1(GtkWidget *widget, gpointer data)
 }
 void play_function(GtkWidget *widget,gpointer data)
 {
+    sendMessage("play fucntion\n");
     play_audio_from_mic();
 }
 
 void stop_function(GtkWidget *widget,gpointer data)
 {
+    sendMessage("stop fucntion\n");
     stop_audio_from_mic();
 }
 

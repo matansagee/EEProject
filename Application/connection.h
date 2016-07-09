@@ -11,8 +11,7 @@
 
 int connect_to_client();
 int disconnect();
-void sendMessage(char* message);
+int sendMessage(char* message);
 char* recvMessage();
-//GSocketClient* gconnect();
 
 #endif //EEPROJECT_CONNECTION_H
