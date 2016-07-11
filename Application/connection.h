@@ -8,9 +8,9 @@
 
 
 #define MAX_CHARACTERS_IN_STRING 256
-
+void init_socket();
 int connect_to_client();
-int disconnect();
+void disconnect();
 int sendMessage(char* message);
 int connection_status();
 

@@ -124,6 +124,8 @@ void *connection_handler(void *socket_desc)
         //end of string marker
         client_message[read_size] = '\0';
 
+        printf("message: %s\n",client_message);
+
         //Send the message back to client
         if (number_of_active_links != 0)
         {

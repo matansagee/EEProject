@@ -13,21 +13,23 @@
 
 int socket_desc;
 int connected = 0;
-
+struct sockaddr_in client;
 /**
  * connect to client function
  * open socket listener to inaddrany and port 5001
  * @return 1 - success
  * @return 0 - failed
  */
+
+void init_socket()
+{
+    //Prepare the sockaddr_in structure
+    client.sin_family = AF_INET;
+    client.sin_addr.s_addr = inet_addr("132.66.199.244");
+    client.sin_port = htons( 5222);
+}
 int connect_to_client()
 {
-    int sockfd, portno, clilen;
-    char buffer[256];
-    struct sockaddr_in serv_addr, cli_addr;
-    int n;
-
-    struct sockaddr_in client;
     //Create socket
     socket_desc = socket(AF_INET , SOCK_STREAM , 0);
     if (socket_desc == -1)
@@ -35,11 +37,6 @@ int connect_to_client()
         printf("Could not create socket");
     }
     puts("Socket created");
-
-    //Prepare the sockaddr_in structure
-    client.sin_family = AF_INET;
-    client.sin_addr.s_addr = inet_addr("132.66.199.244");
-    client.sin_port = htons( 5222);
 
     connect( socket_desc, (struct sockaddr *) &client, sizeof(client));
     if ( socket_desc == 0 ) {
@@ -76,7 +73,6 @@ char* recvMessage() {
         printf("recv failed");
         return NULL;
     }
-
     return client_message;
 }
 
@@ -90,14 +86,11 @@ int sendMessage(char* message){
     return (number_of_bytes_returned == strlen(message));
 }
 
-/**
- * return 1 if succeded
- * 0 if failed
- */
-int disconnect(){
-    if(!connected) return 1;
+
+void disconnect(){
+    if(!connected) return;
+    connected = 0;
     close(socket_desc);
-    return 1;
 }
 
 int connection_status(){

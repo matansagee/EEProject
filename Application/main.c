@@ -33,103 +33,109 @@ GtkWidget *buttonClose;
 GtkWidget *clockLabel;
 GtkWidget *helpLabel;
 
-void stop_device(GtkWidget *widget,gpointer data);
-void spin_button_device1(GtkWidget *widget, gpointer data);
+gboolean stop_device(GtkWidget *widget,gpointer data);
 void button_function(GtkWidget *widget,gpointer data);
 gboolean reset_help_label(gpointer label);
 gboolean update_clock(gpointer label);
 
 
-void spin_button_device1(GtkWidget *widget, gpointer data)
-{
-//    int value = gtk_spin_button_get_value_as_int(widget);
-//    g_print ("new value - %d \n",value);
-//    time_t curtime;
-//
-//    time(&curtime);
-//    struct tm * timeinfo = localtime (&curtime);
-//
-//    // compute the angles of the indicators of our clock
-//    int minutes = (int) timeinfo->tm_min * M_PI / 30;
-//    int hours = (int) timeinfo->tm_hour * M_PI / 6;
-//    int seconds= (int) timeinfo->tm_sec * M_PI / 30;
-//    printf("Current time = %s\n", ctime(&curtime));
-//    printf("%d %d %d\n",seconds,minutes,hours);
-
-}
 
 void button_function(GtkWidget *widget,gpointer data)
 {
     char* label_string = gtk_button_get_label(widget);
+
     if (connection_status() == 0){
         gtk_label_set_text(GTK_LABEL(helpLabel), "please connect before turning on device");
         g_timeout_add_seconds (4, reset_help_label, (gpointer) helpLabel);
         return;
     }
+
     if (!strcmp(label_string,"Device1")){
-        sendMessage("1:start");
         int value = gtk_spin_button_get_value_as_int(spinButtonDevice1);
         if (value==0)
         {
             gtk_label_set_text(GTK_LABEL(helpLabel), "set time");
             g_timeout_add_seconds (4, reset_help_label, (gpointer) helpLabel);
         } else {
+            sendMessage("1:start");
             g_print ("new value - %d \n",value);
-            g_timeout_add_seconds (value*60, stop_device, (gpointer) buttonDevice1);
+            g_timeout_add_seconds (value, stop_device, (gpointer) buttonDevice1);
         }
 
     } else if (!strcmp(label_string,"Device2")){
-
+        int value = gtk_spin_button_get_value_as_int(spinButtonDevice2);
+        if (value==0)
+        {
+            gtk_label_set_text(GTK_LABEL(helpLabel), "set time");
+            g_timeout_add_seconds (4, reset_help_label, (gpointer) helpLabel);
+        } else {
+            sendMessage("2:start");
+            g_print ("new value - %d \n",value);
+            g_timeout_add_seconds (value, stop_device, (gpointer) buttonDevice2);
+        }
     } else if (!strcmp(label_string,"Device3")) {
-
+        int value = gtk_spin_button_get_value_as_int(spinButtonDevice3);
+        if (value==0)
+        {
+            gtk_label_set_text(GTK_LABEL(helpLabel), "set time");
+            g_timeout_add_seconds (4, reset_help_label, (gpointer) helpLabel);
+        } else {
+            sendMessage("3:start");
+            g_print ("new value - %d \n",value);
+            g_timeout_add_seconds (value, stop_device, (gpointer) buttonDevice3);
+        }
     } else if (!strcmp(label_string,"Device4")) {
-
+        int value = gtk_spin_button_get_value_as_int(spinButtonDevice4);
+        if (value==0)
+        {
+            gtk_label_set_text(GTK_LABEL(helpLabel), "set time");
+            g_timeout_add_seconds (4, reset_help_label, (gpointer) helpLabel);
+        } else {
+            sendMessage("4:start");
+            g_print ("new value - %d \n",value);
+            g_timeout_add_seconds (value, stop_device, (gpointer) buttonDevice4);
+        }
     }
 }
 
-void stop_device(GtkWidget *widget,gpointer data)
+gboolean stop_device(GtkWidget *widget,gpointer data)
 {
     char* label_string = gtk_button_get_label(widget);
 
-    if (strcmp(label_string,"Device1")){
+    if (!strcmp(label_string,"Device1")){
         sendMessage("1:stop");
-    } else if (strcmp(label_string,"Device2")){
+    } else if (!strcmp(label_string,"Device2")){
         sendMessage("2:stop");
-    } else if (strcmp(label_string,"Device3")) {
+    } else if (!strcmp(label_string,"Device3")) {
         sendMessage("3:stop");
-    } else if (strcmp(label_string,"Device4")) {
+    } else if (!strcmp(label_string,"Device4")) {
         sendMessage("4:stop");
     }
+    return FALSE;
 }
 
 
 void play_function(GtkWidget *widget,gpointer data)
 {
-    sendMessage("play fucntion\n");
     play_audio_from_mic();
 }
 
 void stop_function(GtkWidget *widget,gpointer data)
 {
-    sendMessage("stop fucntion\n");
     stop_audio_from_mic();
 }
 
 void connect_function(GtkWidget *widget,gpointer data)
 {
-    char* current_string = gtk_button_get_label(widget);
-    connect_to_client();
     if (connection_status() == 0) {
-        return;
+        connect_to_client();
+        sendMessage("0:start");
+        gtk_button_set_label(GTK_BUTTON(widget), "Disconnect");
+    } else {
+        sendMessage("0:stop");
+        disconnect();
+        gtk_button_set_label(GTK_BUTTON(widget), "Connect");
     }
-
-    if (!g_strcmp0(current_string,"Connect")) {
-        gtk_label_set_text(GTK_LABEL(widget), "Disconnect");
-    }
-    else{
-        gtk_label_set_text(GTK_LABEL(widget), "Connect");
-    }
-
 }
 
 gboolean reset_help_label(gpointer label){
@@ -227,8 +233,10 @@ activate (GtkApplication *app,    gpointer        user_data)
     g_signal_connect (buttonConnect, "clicked", G_CALLBACK (connect_function), NULL);
     g_signal_connect (buttonPlay, "clicked", G_CALLBACK (play_function), NULL);
     g_signal_connect (buttonStop, "clicked", G_CALLBACK (stop_function), NULL);
-    g_signal_connect (spinButtonDevice1,"value-changed", G_CALLBACK(spin_button_device1),NULL);
     g_signal_connect (buttonDevice1, "clicked", G_CALLBACK (button_function), NULL);
+    g_signal_connect (buttonDevice2, "clicked", G_CALLBACK (button_function), NULL);
+    g_signal_connect (buttonDevice3, "clicked", G_CALLBACK (button_function), NULL);
+    g_signal_connect (buttonDevice4, "clicked", G_CALLBACK (button_function), NULL);
 
     gtk_container_add (GTK_CONTAINER (window), grid);
 
@@ -243,6 +251,7 @@ main (int    argc, char **argv)
     gst_init(&argc,&argv);
     GtkApplication *app;
     int status;
+    init_socket();
 
     app = gtk_application_new ("smart.house", G_APPLICATION_FLAGS_NONE);
     g_signal_connect (app, "activate", G_CALLBACK (activate), NULL);
