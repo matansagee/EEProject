@@ -6,7 +6,7 @@
 
 //GstElement *pipeline, *alsasrc , *mulawenc ,*rtppcmupay ,*udpsink;
 GstElement *pipeline, *udpsrc , *queue ,*rtppcmudepay ,*mulawdec,*audioconvert,*autoaudiosink;
-
+int play =0;
 GMainLoop *loop;
 
 static gboolean
@@ -100,7 +100,7 @@ void create_loop()
         return;
     }
 
-    g_object_set(G_OBJECT(udpsrc), "port", 5002, NULL);
+    g_object_set(G_OBJECT(udpsrc), "port", 5601, NULL);
     g_object_set(G_OBJECT(udpsrc), "caps",rx_caps, NULL);
     gst_caps_unref (rx_caps);
 
@@ -130,9 +130,11 @@ void create_loop()
 }
 
 void play_audio_from_mic() {
+    play = 1;
     create_loop();
 }
 
 void stop_audio_from_mic(){
+    if (!play) return;
     g_main_loop_quit (loop);
 }

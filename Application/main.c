@@ -7,28 +7,102 @@
 #include <time.h>
 #include <math.h>
 #include <gst/gst.h>
+#include <string.h>
 
 #include "connection.h"
 #include "audio.h"
 
-static void
-spin_button_device1(GtkWidget *widget, gpointer data)
+GtkWidget *window;
+GtkWidget *buttonPlay;
+GtkWidget *buttonStop;
+GtkWidget *buttonConnect;
+GtkWidget *grid;
+GtkWidget *buttonDevice1;
+GtkWidget *buttonDevice2;
+GtkWidget *buttonDevice3;
+GtkWidget *buttonDevice4;
+GtkWidget *spinButtonDevice1;
+GtkWidget *spinButtonDevice2;
+GtkWidget *spinButtonDevice3;
+GtkWidget *spinButtonDevice4;
+GtkWidget *adjustment1;
+GtkWidget *adjustment2;
+GtkWidget *adjustment3;
+GtkWidget *adjustment4;
+GtkWidget *buttonClose;
+GtkWidget *clockLabel;
+GtkWidget *helpLabel;
+
+void stop_device(GtkWidget *widget,gpointer data);
+void spin_button_device1(GtkWidget *widget, gpointer data);
+void button_function(GtkWidget *widget,gpointer data);
+gboolean reset_help_label(gpointer label);
+gboolean update_clock(gpointer label);
+
+
+void spin_button_device1(GtkWidget *widget, gpointer data)
 {
-    int value = gtk_spin_button_get_value_as_int(widget);
-    g_print ("new value - %d \n",value);
-    time_t curtime;
-
-    time(&curtime);
-    struct tm * timeinfo = localtime (&curtime);
-
-    // compute the angles of the indicators of our clock
-    double minutes = timeinfo->tm_min * M_PI / 30;
-    double hours = timeinfo->tm_hour * M_PI / 6;
-    double seconds= timeinfo->tm_sec * M_PI / 30;
-    printf("Current time = %s\n", ctime(&curtime));
-    printf("%d %d %d\n",seconds,minutes,hours);
+//    int value = gtk_spin_button_get_value_as_int(widget);
+//    g_print ("new value - %d \n",value);
+//    time_t curtime;
+//
+//    time(&curtime);
+//    struct tm * timeinfo = localtime (&curtime);
+//
+//    // compute the angles of the indicators of our clock
+//    int minutes = (int) timeinfo->tm_min * M_PI / 30;
+//    int hours = (int) timeinfo->tm_hour * M_PI / 6;
+//    int seconds= (int) timeinfo->tm_sec * M_PI / 30;
+//    printf("Current time = %s\n", ctime(&curtime));
+//    printf("%d %d %d\n",seconds,minutes,hours);
 
 }
+
+void button_function(GtkWidget *widget,gpointer data)
+{
+    char* label_string = gtk_button_get_label(widget);
+    if (connection_status() == 0){
+        gtk_label_set_text(GTK_LABEL(helpLabel), "please connect before turning on device");
+        g_timeout_add_seconds (4, reset_help_label, (gpointer) helpLabel);
+        return;
+    }
+    if (!strcmp(label_string,"Device1")){
+        sendMessage("1:start");
+        int value = gtk_spin_button_get_value_as_int(spinButtonDevice1);
+        if (value==0)
+        {
+            gtk_label_set_text(GTK_LABEL(helpLabel), "set time");
+            g_timeout_add_seconds (4, reset_help_label, (gpointer) helpLabel);
+        } else {
+            g_print ("new value - %d \n",value);
+            g_timeout_add_seconds (value*60, stop_device, (gpointer) buttonDevice1);
+        }
+
+    } else if (!strcmp(label_string,"Device2")){
+
+    } else if (!strcmp(label_string,"Device3")) {
+
+    } else if (!strcmp(label_string,"Device4")) {
+
+    }
+}
+
+void stop_device(GtkWidget *widget,gpointer data)
+{
+    char* label_string = gtk_button_get_label(widget);
+
+    if (strcmp(label_string,"Device1")){
+        sendMessage("1:stop");
+    } else if (strcmp(label_string,"Device2")){
+        sendMessage("2:stop");
+    } else if (strcmp(label_string,"Device3")) {
+        sendMessage("3:stop");
+    } else if (strcmp(label_string,"Device4")) {
+        sendMessage("4:stop");
+    }
+}
+
+
 void play_function(GtkWidget *widget,gpointer data)
 {
     sendMessage("play fucntion\n");
@@ -44,17 +118,26 @@ void stop_function(GtkWidget *widget,gpointer data)
 void connect_function(GtkWidget *widget,gpointer data)
 {
     char* current_string = gtk_button_get_label(widget);
+    connect_to_client();
+    if (connection_status() == 0) {
+        return;
+    }
+
     if (!g_strcmp0(current_string,"Connect")) {
-        gtk_button_set_label(widget, "Disconnect");
+        gtk_label_set_text(GTK_LABEL(widget), "Disconnect");
     }
     else{
-        gtk_button_set_label(widget, "Connect");
+        gtk_label_set_text(GTK_LABEL(widget), "Connect");
     }
-    connect_to_client();
 
 }
-gboolean
-update_clock(gpointer label)
+
+gboolean reset_help_label(gpointer label){
+    gtk_label_set_text(GTK_LABEL(label),"");
+    return FALSE;
+}
+
+gboolean update_clock(gpointer label)
 {
     /* the GtkLabel is passed in as user data */
 
@@ -81,32 +164,13 @@ update_clock(gpointer label)
 static void
 activate (GtkApplication *app,    gpointer        user_data)
 {
-    GtkWidget *window;
-    GtkWidget *buttonPlay;
-    GtkWidget *buttonStop;
-    GtkWidget *buttonConnect;
-    GtkWidget *grid;
-    GtkWidget *buttonDevice1;
-    GtkWidget *buttonDevice2;
-    GtkWidget *buttonDevice3;
-    GtkWidget *buttonDevice4;
-    GtkWidget *spinButtonDevice1;
-    GtkWidget *spinButtonDevice2;
-    GtkWidget *spinButtonDevice3;
-    GtkWidget *spinButtonDevice4;
-    GtkWidget *adjustment1;
-    GtkWidget *adjustment2;
-    GtkWidget *adjustment3;
-    GtkWidget *adjustment4;
-    GtkWidget *label;
-    GtkWidget *buttonClose;
-    GtkWidget *clockLabel;
 
     window = gtk_application_window_new (app);
     gtk_window_set_title (GTK_WINDOW (window), "Smart House");
     gtk_window_set_default_size (GTK_WINDOW (window), 200, 200);
 
     clockLabel = gtk_label_new (NULL);
+    helpLabel = gtk_label_new ("help");
     buttonPlay = gtk_button_new_with_label ("Play");
     buttonStop = gtk_button_new_with_label ("Stop");
     buttonClose = gtk_button_new_with_label("Close");
@@ -117,7 +181,7 @@ activate (GtkApplication *app,    gpointer        user_data)
     buttonDevice4 = gtk_button_new_with_label ("Device4");
 
     /* Create a label to be shown in the window */
-    label = gtk_label_new ("Choose a number");
+//    label = gtk_label_new ("Choose a number");
 
     /* Create an adjustment representing an adjustable bounded value */
     adjustment1 = gtk_adjustment_new (0, 0, 100, 1, 0, 0);
@@ -154,7 +218,8 @@ activate (GtkApplication *app,    gpointer        user_data)
     gtk_grid_attach (GTK_GRID (grid), spinButtonDevice3, 1, 4, 1, 1);
     gtk_grid_attach (GTK_GRID (grid), spinButtonDevice4, 1, 5, 1, 1);
     gtk_grid_attach (GTK_GRID (grid),buttonClose,0,6,2,1);
-    gtk_grid_attach(GTK_GRID (grid),clockLabel,0,7,2,1);
+    gtk_grid_attach(GTK_GRID (grid),helpLabel,0,7,2,1);
+    gtk_grid_attach(GTK_GRID (grid),clockLabel,0,8,2,1);
 
     g_signal_connect (buttonClose, "clicked", G_CALLBACK (stop_function), NULL);
     g_signal_connect_swapped (buttonClose, "clicked", G_CALLBACK (gtk_widget_destroy), window);
@@ -163,6 +228,7 @@ activate (GtkApplication *app,    gpointer        user_data)
     g_signal_connect (buttonPlay, "clicked", G_CALLBACK (play_function), NULL);
     g_signal_connect (buttonStop, "clicked", G_CALLBACK (stop_function), NULL);
     g_signal_connect (spinButtonDevice1,"value-changed", G_CALLBACK(spin_button_device1),NULL);
+    g_signal_connect (buttonDevice1, "clicked", G_CALLBACK (button_function), NULL);
 
     gtk_container_add (GTK_CONTAINER (window), grid);
 
@@ -182,8 +248,6 @@ main (int    argc, char **argv)
     g_signal_connect (app, "activate", G_CALLBACK (activate), NULL);
     status = g_application_run (G_APPLICATION (app), argc, argv);
     g_object_unref (app);
-
-
 
     return status;
 }

@@ -22,10 +22,11 @@ void *connection_handler(void *);
 
 int main(int argc , char *argv[])
 {
+    printf("hello, i'm server.\ncan i make you some Java?\n");
     int socket_desc , client_sock , c;
     struct sockaddr_in server , client;
     int i;
-    clients_sockets = (int) malloc(MAX_NUMBER_OF_ACTIVE_LINKS * sizeof(int));
+    clients_sockets = (int*) malloc(MAX_NUMBER_OF_ACTIVE_LINKS * sizeof(int));
     if (clients_sockets==NULL)
     {
         printf("allocating memory failed.\n");
@@ -40,12 +41,12 @@ int main(int argc , char *argv[])
     {
         printf("Could not create socket");
     }
-    puts("Socket created");
+    printf("server socket created\n");
 
     //Prepare the sockaddr_in structure
     server.sin_family = AF_INET;
     server.sin_addr.s_addr = INADDR_ANY;
-    server.sin_port = htons( 8888 );
+    server.sin_port = htons( 5222 );
 
     //Bind
     if( bind(socket_desc,(struct sockaddr *)&server , sizeof(server)) < 0)
@@ -62,16 +63,10 @@ int main(int argc , char *argv[])
     //Accept and incoming connection
     puts("Waiting for incoming connections...");
     c = sizeof(struct sockaddr_in);
-
-
-    //Accept and incoming connection
-    puts("Waiting for incoming connections...");
-    c = sizeof(struct sockaddr_in);
     pthread_t thread_id;
 
     while((client_sock = accept(socket_desc, (struct sockaddr *)&client, (socklen_t*)&c)))
     {
-
         puts("Connection accepted");
 
         if(number_of_active_links >= MAX_NUMBER_OF_ACTIVE_LINKS)

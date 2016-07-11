@@ -9,11 +9,7 @@
       <sourceFolder url="file://$MODULE_DIR$/Application/audio.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/Application/connection.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/CMakeLists.txt" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/Client/connection.h" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/Client/client.c" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/Client/main.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/Client/client.h" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/Client/connection.c" isTestSource="false" />
     </content>
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module-library">

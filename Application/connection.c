@@ -9,8 +9,10 @@
 #include "connection.h"
 #include <glib.h>
 #include <gio/gio.h>
+#include <arpa/inet.h>
 
 int socket_desc;
+int connected = 0;
 
 /**
  * connect to client function
@@ -18,7 +20,12 @@ int socket_desc;
  * @return 1 - success
  * @return 0 - failed
  */
-int connect_to_client() {
+int connect_to_client()
+{
+    int sockfd, portno, clilen;
+    char buffer[256];
+    struct sockaddr_in serv_addr, cli_addr;
+    int n;
 
     struct sockaddr_in client;
     //Create socket
@@ -31,14 +38,15 @@ int connect_to_client() {
 
     //Prepare the sockaddr_in structure
     client.sin_family = AF_INET;
-    client.sin_addr.s_addr = INADDR_ANY;
-    client.sin_port = htons( 8888 );
+    client.sin_addr.s_addr = inet_addr("132.66.199.244");
+    client.sin_port = htons( 5222);
 
     connect( socket_desc, (struct sockaddr *) &client, sizeof(client));
     if ( socket_desc == 0 ) {
         perror("Error at socket()");
         return 0;
     }
+    connected = 1;
     return 1;
 }
 
@@ -77,11 +85,21 @@ char* recvMessage() {
  * 0 if failed
  */
 int sendMessage(char* message){
+    if (!connected) return 0;
     int number_of_bytes_returned = write(socket_desc , message , strlen(message));
     return (number_of_bytes_returned == strlen(message));
 }
 
+/**
+ * return 1 if succeded
+ * 0 if failed
+ */
 int disconnect(){
+    if(!connected) return 1;
     close(socket_desc);
+    return 1;
 }
 
+int connection_status(){
+    return connected;
+}
