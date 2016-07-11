@@ -66,22 +66,22 @@ int main(int argc, char** argv)
 
     while( (read_size = recv(socket_desc , client_message , MAX_CHARACTERS_IN_STRING , 0)) > 0 )
     {
-	char *device_num,*command;
-        
-	client_message[read_size] = '\0';
- 	printf("message: %s\n",client_message);
-        
-	device_num = strtok (client_message,":"); // 1,2,3,4
-        printf("device_num: %s\n",device_num);
-	command = strtok (NULL,":"); //start,stop
-        printf("command: %s\n",command);
-	printf("%d\n",atoi(device_num));
-	
-	if (atoi(device_num)==0){
-		continue;
-	}
+        char *device_num,*command;
 
-	switch(atoi(device_num))
+        client_message[read_size] = '\0';
+        printf("message: %s\n",client_message);
+
+        device_num = strtok (client_message,":"); // 1,2,3,4
+        printf("device_num: %s\n",device_num);
+        command = strtok (NULL,":"); //start,stop
+        printf("command: %s\n",command);
+        printf("%d\n",atoi(device_num));
+
+        if (atoi(device_num)==0){
+            continue;
+        }
+
+        switch(atoi(device_num))
         {
             case 100:
                 if (!strcmp(command,"start")){
@@ -122,21 +122,21 @@ int main(int argc, char** argv)
                     digitalWrite(device_4, LOW);
                 }
                 break;
-	     default:
-		break;
+            default:
+                break;
         }
         //clear the message buffer
         memset(client_message, 0, 2000);
     }
 
-	if (read_size<=0)
-	{
-	printf("session terminated\n");
-	                    digitalWrite(connect_ind, LOW);
-                    digitalWrite(device_1, LOW);
-                    digitalWrite(device_2, LOW);
-                    digitalWrite(device_3, LOW);
-                    digitalWrite(device_4, LOW);
+    if (read_size<=0)
+    {
+        printf("session terminated\n");
+        digitalWrite(connect_ind, LOW);
+        digitalWrite(device_1, LOW);
+        digitalWrite(device_2, LOW);
+        digitalWrite(device_3, LOW);
+        digitalWrite(device_4, LOW);
 
-	}
+    }
 }
