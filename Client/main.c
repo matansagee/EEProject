@@ -1,4 +1,3 @@
-//
 // Created by shani on 08/06/16.
 //
 #include <stdio.h>
@@ -9,9 +8,25 @@
 #include <glib.h>
 #include <gio/gio.h>
 #include <arpa/inet.h>
+#include <wiringPi>
 
 #define MAX_CHARACTERS_IN_STRING 256
 
+const int device_1 = 06;
+const int device_2 = 13;
+const int device_3 = 19;
+const int device_4 = 26;
+const int connect_ind = 21;
+
+void init_gpio(){
+    wiringPiSetup();  //Intalized wiringPi's simlified number system
+    wiringPiSerupGpio();
+    pinMode (device_1, OUTPUT);
+    pinMode (device_2, OUTPUT);
+    pinMode (device_3, OUTPUT);
+    pinMode (device_4, OUTPUT);
+    pinMode (connect_ind, OUTPUT);
+}
 
 int main(int argc, char** argv)
 {
@@ -48,18 +63,56 @@ int main(int argc, char** argv)
         printf("send failed.\n");
     }
 
+    init_gpio();
+
+
     while( (read_size = recv(socket_desc , client_message , MAX_CHARACTERS_IN_STRING , 0)) > 0 )
     {
         //end of string marker
         client_message[read_size] = '\0';
-        char *command,*arg;
-        *command = strtok (client_message,":");
-        *arg = strtok (NULL,":");
-
-        
+        char *device_num,*command;
+        device_num = strtok (client_message,":"); // 1,2,3,4
+        command = strtok (NULL,":"); //start,stop
+        switch(atoi(device_num))
+        {
+            case 0:
+                if (!strcmp(command,"start")){
+                    digitalWrite(connect_ind, HIGH);
+                } else if(!strcmp(command,"stop")) {
+                    digitalWrite(connect_ind, LOW);
+                }
+                break;
+            case 1:
+                if (!strcmp(command,"start")){
+                    digitalWrite(device_1, HIGH);
+                } else if(!strcmp(command,"stop")) {
+                    digitalWrite(device_1, LOW);
+                }
+                break;
+            case 2:
+                if (!strcmp(command,"start")){
+                    digitalWrite(device_2, HIGH);
+                } else if(!strcmp(command,"stop")) {
+                    digitalWrite(device_2, LOW);
+                }
+                break;
+            case 3:
+                if (!strcmp(command,"start")){
+                    digitalWrite(device_3, HIGH);
+                } else if(!strcmp(command,"stop")) {
+                    digitalWrite(device_3, LOW);
+                }
+                break;
+            case 4:
+                if (!strcmp(command,"start")){
+                    digitalWrite(device_4, HIGH);
+                } else if(!strcmp(command,"stop")) {
+                    digitalWrite(device_4, LOW);
+                }
+                break;
+        }
 
         //clear the message buffer
         memset(client_message, 0, 2000);
     }
 }
-
