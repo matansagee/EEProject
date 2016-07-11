@@ -5,10 +5,8 @@
 #include <netdb.h>
 #include <netinet/in.h>
 #include <string.h>
-#include <glib.h>
-#include <gio/gio.h>
 #include <arpa/inet.h>
-#include <wiringPi>
+#include <wiringPi.h>
 
 #define MAX_CHARACTERS_IN_STRING 256
 
@@ -19,8 +17,8 @@ const int device_4 = 26;
 const int connect_ind = 21;
 
 void init_gpio(){
-    wiringPiSetup();  //Intalized wiringPi's simlified number system
-    wiringPiSerupGpio();
+//    wiringPiSetup();  //Intalized wiringPi's simlified number system
+    wiringPiSetupGpio();
     pinMode (device_1, OUTPUT);
     pinMode (device_2, OUTPUT);
     pinMode (device_3, OUTPUT);
@@ -64,22 +62,36 @@ int main(int argc, char** argv)
     }
 
     init_gpio();
-
+    printf("setting GPIOs\n");
 
     while( (read_size = recv(socket_desc , client_message , MAX_CHARACTERS_IN_STRING , 0)) > 0 )
     {
-        //end of string marker
-        client_message[read_size] = '\0';
-        char *device_num,*command;
-        device_num = strtok (client_message,":"); // 1,2,3,4
-        command = strtok (NULL,":"); //start,stop
-        switch(atoi(device_num))
+	char *device_num,*command;
+        
+	client_message[read_size] = '\0';
+ 	printf("message: %s\n",client_message);
+        
+	device_num = strtok (client_message,":"); // 1,2,3,4
+        printf("device_num: %s\n",device_num);
+	command = strtok (NULL,":"); //start,stop
+        printf("command: %s\n",command);
+	printf("%d\n",atoi(device_num));
+	
+	if (atoi(device_num)==0){
+		continue;
+	}
+
+	switch(atoi(device_num))
         {
-            case 0:
+            case 100:
                 if (!strcmp(command,"start")){
                     digitalWrite(connect_ind, HIGH);
                 } else if(!strcmp(command,"stop")) {
                     digitalWrite(connect_ind, LOW);
+                    digitalWrite(device_1, LOW);
+                    digitalWrite(device_2, LOW);
+                    digitalWrite(device_3, LOW);
+                    digitalWrite(device_4, LOW);
                 }
                 break;
             case 1:
@@ -110,9 +122,21 @@ int main(int argc, char** argv)
                     digitalWrite(device_4, LOW);
                 }
                 break;
+	     default:
+		break;
         }
-
         //clear the message buffer
         memset(client_message, 0, 2000);
     }
+
+	if (read_size<=0)
+	{
+	printf("session terminated\n");
+	                    digitalWrite(connect_ind, LOW);
+                    digitalWrite(device_1, LOW);
+                    digitalWrite(device_2, LOW);
+                    digitalWrite(device_3, LOW);
+                    digitalWrite(device_4, LOW);
+
+	}
 }
