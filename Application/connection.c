@@ -30,6 +30,8 @@ void init_socket()
 }
 int connect_to_client()
 {
+    int read_size;
+    char message[MAX_CHARACTERS_IN_STRING];
     //Create socket
     socket_desc = socket(AF_INET , SOCK_STREAM , 0);
     if (socket_desc == -1)
@@ -46,9 +48,21 @@ int connect_to_client()
         return 0;
     }
 
-    puts("connection established");
-    connected = 1;
-    return 1;
+    read_size = recv(socket_desc , message , MAX_CHARACTERS_IN_STRING , 0);
+    message[read_size] = '\0';
+    if (read_size<=0){
+        printf("connection failed\n");
+        return 0;
+    }
+    if (atoi(message) == 2){
+        printf("connection established to client through server\n");
+        connected = 1;
+    } else {
+        printf("connection not established to client through server\n");
+        connected = 0;
+    }
+
+    return connected;
 }
 
 /**
@@ -56,8 +70,26 @@ int connect_to_client()
  * 0 if failed
  */
 int sendMessage(char* message){
+    int read_size;
+    char* in_message[MAX_CHARACTERS_IN_STRING];
+
     if (!connected) return 0;
     int number_of_bytes_returned = write(socket_desc , message , strlen(message));
+    if (number_of_bytes_returned <=0){
+        disconnect();
+        return 0;
+    }
+    read_size = recv(socket_desc , in_message , MAX_CHARACTERS_IN_STRING , 0);
+    in_message[read_size] = '\0';
+    printf("number of active connection in the server %d\n",atoi(in_message));
+    if (read_size<=0){
+        printf("connection failed\n");
+        return 0;
+    }
+    if (atoi(in_message) == 1) {
+        disconnect();
+        return 0;
+    }
     return (number_of_bytes_returned == strlen(message));
 }
 

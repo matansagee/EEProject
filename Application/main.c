@@ -53,7 +53,7 @@ void button_function(GtkWidget *widget,gpointer data)
         return;
     }
 
-    if (!strcmp(label_string,"Device1")){
+    if (!strcmp(label_string,"Device1") || !strcmp(label_string,"Device1-On")){
         int value = gtk_spin_button_get_value_as_int(spinButtonDevice1);
         if (value==0)
         {
@@ -63,11 +63,16 @@ void button_function(GtkWidget *widget,gpointer data)
             sendMessage("1:start");
             device1_on = 1;
             gtk_button_set_label(GTK_BUTTON(widget), "Device1-On");
-            g_print ("new value - %d \n",value);
+            g_print ("turning on device1 for %d seconds \n",value);
             g_timeout_add_seconds (value, stop_device, (gpointer) buttonDevice1);
+        } else if (device1_on) {
+            sendMessage("1:stop");
+            device1_on = 0;
+            gtk_button_set_label(GTK_BUTTON(widget), "Device1");
+            g_print ("turning off device1\n");
         }
 
-    } else if (!strcmp(label_string,"Device2")){
+    } else if (!strcmp(label_string,"Device2") || !strcmp(label_string,"Device2-On")){
         int value = gtk_spin_button_get_value_as_int(spinButtonDevice2);
         if (value==0)
         {
@@ -76,11 +81,17 @@ void button_function(GtkWidget *widget,gpointer data)
         } else if (!device2_on){
             sendMessage("2:start");
             device2_on = 1;
-            g_print ("new value - %d \n",value);
+            g_print ("turning on device2 for %d seconds \n",value);
             gtk_button_set_label(GTK_BUTTON(widget), "Device2-On");
             g_timeout_add_seconds (value, stop_device, (gpointer) buttonDevice2);
+
+        } else if (device2_on) {
+            sendMessage("2:stop");
+            device2_on = 0;
+            gtk_button_set_label(GTK_BUTTON(widget), "Device2");
+            g_print ("turning off device2\n");
         }
-    } else if (!strcmp(label_string,"Device3")) {
+    } else if (!strcmp(label_string,"Device3")  || !strcmp(label_string,"Device3-On")) {
         int value = gtk_spin_button_get_value_as_int(spinButtonDevice3);
         if (value==0)
         {
@@ -90,10 +101,15 @@ void button_function(GtkWidget *widget,gpointer data)
             sendMessage("3:start");
             device3_on = 1;
             gtk_button_set_label(GTK_BUTTON(widget), "Device3-On");
-            g_print ("new value - %d \n",value);
+            g_print ("turning on device3 for %d seconds \n",value);
             g_timeout_add_seconds (value, stop_device, (gpointer) buttonDevice3);
+        } else if (device3_on) {
+            sendMessage("3:stop");
+            device3_on = 0;
+            gtk_button_set_label(GTK_BUTTON(widget), "Device3");
+            g_print ("turning off device3\n");
         }
-    } else if (!strcmp(label_string,"Device4")) {
+    } else if (!strcmp(label_string,"Device4")  || !strcmp(label_string,"Device4-On")) {
         int value = gtk_spin_button_get_value_as_int(spinButtonDevice4);
         if (value==0)
         {
@@ -103,8 +119,13 @@ void button_function(GtkWidget *widget,gpointer data)
             sendMessage("4:start");
             device4_on = 1;
             gtk_button_set_label(GTK_BUTTON(widget), "Device4-On");
-            g_print ("new value - %d \n",value);
+            g_print ("turning on device4 for %d seconds \n",value);
             g_timeout_add_seconds (value, stop_device, (gpointer) buttonDevice4);
+        } else if (device4_on) {
+            sendMessage("4:stop");
+            device4_on = 0;
+            gtk_button_set_label(GTK_BUTTON(widget), "Device4");
+            g_print ("turning off device4\n");
         }
     }
 }
@@ -116,21 +137,25 @@ gboolean stop_device(GtkWidget *widget,gpointer data)
     }
     char* label_string = gtk_button_get_label(widget);
 
-    if (!strcmp(label_string,"Device1-On")){
+    if (!strcmp(label_string,"Device1-On") && device1_on){
         device1_on = 0;
         sendMessage("1:stop");
+        g_print ("turning off device1\n");
         gtk_button_set_label(GTK_BUTTON(widget), "Device1");
-    } else if (!strcmp(label_string,"Device2-On")){
+    } else if (!strcmp(label_string,"Device2-On") && device2_on){
         device2_on = 0;
         sendMessage("2:stop");
+        g_print ("turning off device2\n");
         gtk_button_set_label(GTK_BUTTON(widget), "Device2");
-    } else if (!strcmp(label_string,"Device3-On")) {
+    } else if (!strcmp(label_string,"Device3-On") && device3_on) {
         device3_on = 0;
         sendMessage("3:stop");
+        g_print ("turning off device3\n");
         gtk_button_set_label(GTK_BUTTON(widget), "Device3");
-    } else if (!strcmp(label_string,"Device4-On")) {
+    } else if (!strcmp(label_string,"Device4-On")  && device4_on) {
         device4_on = 0;
         sendMessage("4:stop");
+        g_print ("turning off device4\n");
         gtk_button_set_label(GTK_BUTTON(widget), "Device4");
     }
     return FALSE;
@@ -156,12 +181,14 @@ void connect_function(GtkWidget *widget,gpointer data)
 {
     if (connection_status() == 0) {
         if (connect_to_client() == 0){
-            gtk_label_set_text(GTK_LABEL(helpLabel), "server is not responding");
+            gtk_button_set_label(GTK_BUTTON(widget), "Connect");
+            gtk_label_set_text(GTK_LABEL(helpLabel), "client is not responding");
             g_timeout_add_seconds (4, reset_help_label, (gpointer) helpLabel);
             return;
-        };
-        sendMessage("100:start");
-        gtk_button_set_label(GTK_BUTTON(widget), "Disconnect");
+        } else {
+            sendMessage("100:start");
+            gtk_button_set_label(GTK_BUTTON(widget), "Disconnect");
+        }
     } else {
         sendMessage("100:stop");
         stop_device(buttonDevice1,NULL);
@@ -179,6 +206,14 @@ gboolean reset_help_label(gpointer label){
     return FALSE;
 }
 
+gboolean check_network_connectivity(gpointer connectButton){
+    if (connection_status()){
+        gtk_button_set_label(GTK_BUTTON(connectButton), "Disconnect");
+    } else {
+        gtk_button_set_label(GTK_BUTTON(connectButton), "Connect");
+    }
+    return TRUE;
+}
 gboolean update_clock(gpointer label)
 {
     /* the GtkLabel is passed in as user data */
@@ -281,6 +316,7 @@ activate (GtkApplication *app,    gpointer        user_data)
 
     /* set timeout */
     g_timeout_add (500, update_clock, (gpointer) clockLabel);
+    g_timeout_add (500, check_network_connectivity, (gpointer) buttonConnect);
 
     gtk_widget_show_all (window);
 }

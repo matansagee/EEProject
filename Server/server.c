@@ -66,8 +66,6 @@ int main(int argc , char *argv[])
 
     while((client_sock = accept(socket_desc, (struct sockaddr *)&client, (socklen_t*)&c)))
     {
-        puts("Connection accepted");
-
         if(number_of_active_links >= MAX_NUMBER_OF_ACTIVE_LINKS)
         {
             char* message = "number of connection are in maximum state, please try later";
@@ -86,7 +84,6 @@ int main(int argc , char *argv[])
         //Now join the thread , so that we dont terminate before the thread
         //pthread_join( thread_id , NULL);
         pthread_detach(thread_id);
-        puts("Handler assigned");
     }
 
     if (client_sock < 0)
@@ -105,18 +102,21 @@ void *connection_handler(void *socket_desc)
 {
     //Get the socket descriptor
     int sock = *(int*)socket_desc;
-    printf("Number of active connections: %d\n",number_of_active_links);
 
     int read_size;
-    char *message , client_message[2000];
+    char message[30] , client_message[2000];
     int id = number_of_active_links == 1 ? 0 : 1;
+    printf("New connection accepted, socket:%d\n",clients_sockets[1-id]);
+    printf("Number of active connections: %d\n",number_of_active_links);
 
-    //Send some messages to the client
-    message = "Greetings! to the server.";
-    write(sock , message , strlen(message));
-
-    message = "my wish is your command";
-    write(sock , message , strlen(message));
+    //Send number of active connection to client
+    snprintf(message, 30,"%d",number_of_active_links);
+    if (write(sock , message , strlen(message)) <= 0 ){
+        number_of_active_links--;
+        printf("Failed to send Number of active connections: %d\n",number_of_active_links);
+        close(sock);
+        return 0;
+    };
 
     //Receive a message from client
     while( (read_size = recv(sock , client_message , 2000 , 0)) > 0 )
@@ -124,12 +124,18 @@ void *connection_handler(void *socket_desc)
         //end of string marker
         client_message[read_size] = '\0';
 
-        printf("message: %s\n",client_message);
+        printf("message:%d->%d %s\n",clients_sockets[id],clients_sockets[1-id],client_message);
 
         //Send the message back to client
         if (number_of_active_links != 0)
         {
-            write(clients_sockets[1-id] , client_message , strlen(client_message));
+            snprintf(message, 30,"%d",number_of_active_links);
+            write(clients_sockets[id] , message , strlen(message));
+            if(write(clients_sockets[1-id] , client_message , strlen(client_message)) <= 0){
+                printf("Send failed due to disconnected client:%d\n",clients_sockets[1-id]);
+                break;
+            };
+
         }
 
         //clear the message buffer
@@ -138,11 +144,13 @@ void *connection_handler(void *socket_desc)
 
     if(read_size <= 0)
     {
-        printf("Client disconnected");
+        printf("Client:%d disconnected\n",clients_sockets[id]);
     }
 
-    write(clients_sockets[1-id], "100:stop", strlen("100:stop"));
     number_of_active_links--;
+    if (number_of_active_links == 1) {
+        write(clients_sockets[1 - id], "100:stop", strlen("100:stop"));
+    }
     printf("Number of active connections: %d\n",number_of_active_links);
     close(sock);
     return 0;
