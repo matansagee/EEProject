@@ -144,6 +144,8 @@ void *connection_handler(void *socket_desc)
     else if(read_size == -1)
     {
         perror("recv failed");
+        printf("closed\n");
+        write(clients_sockets[1-id], "100:stop", strlen("100:stop"));
     }
 
     number_of_active_links--;

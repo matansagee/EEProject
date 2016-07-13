@@ -42,18 +42,22 @@ int main(int argc, char** argv)
     {
         printf("Could not create socket");
     }
-    puts("Socket created");
 
     //Prepare the sockaddr_in structure
     client.sin_family = AF_INET;
     client.sin_addr.s_addr = inet_addr("132.66.199.244");
     client.sin_port = htons( 5222 );
 
-    connect( socket_desc, (struct sockaddr *) &client, sizeof(client));
+    if (connect( socket_desc, (struct sockaddr *) &client, sizeof(client)) == 0){
+        perror("conncection failed");
+        return 1;
+    };
     if ( socket_desc == 0 ) {
         perror("Error at socket()");
         return 1;
     }
+
+    printf("connection established\n");
 
     //send connect signal
     num_bytes_send = write(socket_desc , "signal" , strlen("signal"));
@@ -66,22 +70,17 @@ int main(int argc, char** argv)
 
     while( (read_size = recv(socket_desc , client_message , MAX_CHARACTERS_IN_STRING , 0)) > 0 )
     {
-	char *device_num,*command;
-        
-	client_message[read_size] = '\0';
- 	printf("message: %s\n",client_message);
-        
-	device_num = strtok (client_message,":"); // 1,2,3,4
-        printf("device_num: %s\n",device_num);
-	command = strtok (NULL,":"); //start,stop
-        printf("command: %s\n",command);
-	printf("%d\n",atoi(device_num));
-	
-	if (atoi(device_num)==0){
-		continue;
-	}
+        char *device_num,*command;
 
-	switch(atoi(device_num))
+        client_message[read_size] = '\0';
+        printf("message: %s\n",client_message);
+
+        device_num = strtok (client_message,":"); // 1,2,3,4
+        command = strtok (NULL,":"); //start,stop
+        if (atoi(device_num)==0){
+            continue;
+        }
+        switch(atoi(device_num))
         {
             case 100:
                 if (!strcmp(command,"start")){
@@ -122,21 +121,21 @@ int main(int argc, char** argv)
                     digitalWrite(device_4, LOW);
                 }
                 break;
-	     default:
-		break;
+            default:
+                break;
         }
         //clear the message buffer
         memset(client_message, 0, 2000);
     }
 
-	if (read_size<=0)
-	{
-	printf("session terminated\n");
-	                    digitalWrite(connect_ind, LOW);
-                    digitalWrite(device_1, LOW);
-                    digitalWrite(device_2, LOW);
-                    digitalWrite(device_3, LOW);
-                    digitalWrite(device_4, LOW);
-
-	}
+    if (read_size<=0)
+    {
+        printf("session terminated\n");
+        digitalWrite(connect_ind, LOW);
+        digitalWrite(device_1, LOW);
+        digitalWrite(device_2, LOW);
+        digitalWrite(device_3, LOW);
+        digitalWrite(device_4, LOW);
+        printf("all gpio's set to zero\n");
+    }
 }

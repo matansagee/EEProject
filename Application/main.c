@@ -38,7 +38,10 @@ void button_function(GtkWidget *widget,gpointer data);
 gboolean reset_help_label(gpointer label);
 gboolean update_clock(gpointer label);
 
-
+int device1_on =0;
+int device2_on =0;
+int device3_on =0;
+int device4_on =0;
 
 void button_function(GtkWidget *widget,gpointer data)
 {
@@ -56,8 +59,10 @@ void button_function(GtkWidget *widget,gpointer data)
         {
             gtk_label_set_text(GTK_LABEL(helpLabel), "set time");
             g_timeout_add_seconds (4, reset_help_label, (gpointer) helpLabel);
-        } else {
+        } else if (!device1_on){
             sendMessage("1:start");
+            device1_on = 1;
+            gtk_button_set_label(GTK_BUTTON(widget), "Device1-On");
             g_print ("new value - %d \n",value);
             g_timeout_add_seconds (value, stop_device, (gpointer) buttonDevice1);
         }
@@ -68,9 +73,11 @@ void button_function(GtkWidget *widget,gpointer data)
         {
             gtk_label_set_text(GTK_LABEL(helpLabel), "set time");
             g_timeout_add_seconds (4, reset_help_label, (gpointer) helpLabel);
-        } else {
+        } else if (!device2_on){
             sendMessage("2:start");
+            device2_on = 1;
             g_print ("new value - %d \n",value);
+            gtk_button_set_label(GTK_BUTTON(widget), "Device2-On");
             g_timeout_add_seconds (value, stop_device, (gpointer) buttonDevice2);
         }
     } else if (!strcmp(label_string,"Device3")) {
@@ -79,8 +86,10 @@ void button_function(GtkWidget *widget,gpointer data)
         {
             gtk_label_set_text(GTK_LABEL(helpLabel), "set time");
             g_timeout_add_seconds (4, reset_help_label, (gpointer) helpLabel);
-        } else {
+        } else if (!device3_on){
             sendMessage("3:start");
+            device3_on = 1;
+            gtk_button_set_label(GTK_BUTTON(widget), "Device3-On");
             g_print ("new value - %d \n",value);
             g_timeout_add_seconds (value, stop_device, (gpointer) buttonDevice3);
         }
@@ -90,8 +99,10 @@ void button_function(GtkWidget *widget,gpointer data)
         {
             gtk_label_set_text(GTK_LABEL(helpLabel), "set time");
             g_timeout_add_seconds (4, reset_help_label, (gpointer) helpLabel);
-        } else {
+        } else if (!device4_on){
             sendMessage("4:start");
+            device4_on = 1;
+            gtk_button_set_label(GTK_BUTTON(widget), "Device4-On");
             g_print ("new value - %d \n",value);
             g_timeout_add_seconds (value, stop_device, (gpointer) buttonDevice4);
         }
@@ -100,16 +111,27 @@ void button_function(GtkWidget *widget,gpointer data)
 
 gboolean stop_device(GtkWidget *widget,gpointer data)
 {
+    if (connection_status()==0) {
+        return FALSE;
+    }
     char* label_string = gtk_button_get_label(widget);
 
-    if (!strcmp(label_string,"Device1")){
+    if (!strcmp(label_string,"Device1-On")){
+        device1_on = 0;
         sendMessage("1:stop");
-    } else if (!strcmp(label_string,"Device2")){
+        gtk_button_set_label(GTK_BUTTON(widget), "Device1");
+    } else if (!strcmp(label_string,"Device2-On")){
+        device2_on = 0;
         sendMessage("2:stop");
-    } else if (!strcmp(label_string,"Device3")) {
+        gtk_button_set_label(GTK_BUTTON(widget), "Device2");
+    } else if (!strcmp(label_string,"Device3-On")) {
+        device3_on = 0;
         sendMessage("3:stop");
-    } else if (!strcmp(label_string,"Device4")) {
+        gtk_button_set_label(GTK_BUTTON(widget), "Device3");
+    } else if (!strcmp(label_string,"Device4-On")) {
+        device4_on = 0;
         sendMessage("4:stop");
+        gtk_button_set_label(GTK_BUTTON(widget), "Device4");
     }
     return FALSE;
 }
@@ -129,10 +151,14 @@ void connect_function(GtkWidget *widget,gpointer data)
 {
     if (connection_status() == 0) {
         connect_to_client();
-        sendMessage("0:start");
+        sendMessage("100:start");
         gtk_button_set_label(GTK_BUTTON(widget), "Disconnect");
     } else {
-        sendMessage("0:stop");
+        sendMessage("100:stop");
+        stop_device(buttonDevice1,NULL);
+        stop_device(buttonDevice2,NULL);
+        stop_device(buttonDevice3,NULL);
+        stop_device(buttonDevice4,NULL);
         disconnect();
         gtk_button_set_label(GTK_BUTTON(widget), "Connect");
     }
@@ -226,8 +252,11 @@ activate (GtkApplication *app,    gpointer        user_data)
     gtk_grid_attach (GTK_GRID (grid),buttonClose,0,6,2,1);
     gtk_grid_attach(GTK_GRID (grid),helpLabel,0,7,2,1);
     gtk_grid_attach(GTK_GRID (grid),clockLabel,0,8,2,1);
-
-    g_signal_connect (buttonClose, "clicked", G_CALLBACK (stop_function), NULL);
+    gtk_widget_set_size_request (buttonDevice1,100,10);
+    gtk_widget_set_size_request (buttonDevice2,100,10);
+    gtk_widget_set_size_request (buttonDevice3,100,10);
+    gtk_widget_set_size_request (buttonDevice4,100,10);
+    g_signal_connect (buttonClose, "clicked", G_CALLBACK (connect_function), NULL);
     g_signal_connect_swapped (buttonClose, "clicked", G_CALLBACK (gtk_widget_destroy), window);
 
     g_signal_connect (buttonConnect, "clicked", G_CALLBACK (connect_function), NULL);
