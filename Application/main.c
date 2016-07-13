@@ -150,7 +150,11 @@ void stop_function(GtkWidget *widget,gpointer data)
 void connect_function(GtkWidget *widget,gpointer data)
 {
     if (connection_status() == 0) {
-        connect_to_client();
+        if (connect_to_client() == 0){
+            gtk_label_set_text(GTK_LABEL(helpLabel), "server is not responding");
+            g_timeout_add_seconds (4, reset_help_label, (gpointer) helpLabel);
+            return;
+        };
         sendMessage("100:start");
         gtk_button_set_label(GTK_BUTTON(widget), "Disconnect");
     } else {

@@ -36,13 +36,17 @@ int connect_to_client()
     {
         printf("Could not create socket");
     }
-    puts("Socket created");
 
-    connect( socket_desc, (struct sockaddr *) &client, sizeof(client));
+    if (connect( socket_desc, (struct sockaddr *) &client, sizeof(client)) == -1){
+        perror("connection failed");
+        return 0;
+    };
     if ( socket_desc == 0 ) {
-        perror("Error at socket()");
+        perror("socket failed");
         return 0;
     }
+
+    puts("connection established");
     connected = 1;
     return 1;
 }

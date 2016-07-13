@@ -55,7 +55,6 @@ int main(int argc , char *argv[])
         perror("bind failed. Error");
         return 1;
     }
-    puts("bind done");
 
     //Listen
     listen(socket_desc , 3);
@@ -71,7 +70,7 @@ int main(int argc , char *argv[])
 
         if(number_of_active_links >= MAX_NUMBER_OF_ACTIVE_LINKS)
         {
-            char* message = "number of connection are in maximum state, plest try later\n";
+            char* message = "number of connection are in maximum state, please try later";
             write(client_sock , message , strlen(message));
             close(client_sock);
             continue;
@@ -112,10 +111,10 @@ void *connection_handler(void *socket_desc)
     int id = number_of_active_links == 1 ? 0 : 1;
 
     //Send some messages to the client
-    message = "Greetings! I am your connection handler\n";
+    message = "Greetings! to the server.";
     write(sock , message , strlen(message));
 
-    message = "Now type something and i shall send what you type \n";
+    message = "my wish is your command";
     write(sock , message , strlen(message));
 
     //Receive a message from client
@@ -143,11 +142,10 @@ void *connection_handler(void *socket_desc)
     }
     else if(read_size == -1)
     {
-        perror("recv failed");
-        printf("closed\n");
-        write(clients_sockets[1-id], "100:stop", strlen("100:stop"));
+        perror("connection closed");
     }
 
+    write(clients_sockets[1-id], "100:stop", strlen("100:stop"));
     number_of_active_links--;
     close(sock);
     return 0;
