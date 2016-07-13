@@ -150,6 +150,7 @@ void stream_audio_to_server() {
 
 void stop_stream_audio_to_server(){
     if (!play) return;
+    play = 0;
     g_main_loop_quit (loop);
 }
 
@@ -203,7 +204,6 @@ int main(int argc, char** argv)
     }
 
     printf("connection established\n");
-    stream_audio_to_server();
 
     init_gpio();
     printf("setting GPIOs\n");
@@ -225,12 +225,14 @@ int main(int argc, char** argv)
             case 100:
                 if (!strcmp(command,"start")){
                     digitalWrite(connect_ind, HIGH);
+    		    stream_audio_to_server();
                 } else if(!strcmp(command,"stop")) {
                     digitalWrite(connect_ind, LOW);
                     digitalWrite(device_1, LOW);
                     digitalWrite(device_2, LOW);
                     digitalWrite(device_3, LOW);
                     digitalWrite(device_4, LOW);
+		    stop_stream_audio_to_server();	
                 }
                 break;
             case 1:
