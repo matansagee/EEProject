@@ -134,7 +134,6 @@ void create_loop()
 
     /* Out of the main loop, clean up nicely */
     g_print ("Returned, stopping playback\n");
-    printf ("Returned, stopping playback\n");
     gst_element_set_state (pipeline, GST_STATE_NULL);
 
     g_print ("Deleting pipeline\n");
@@ -149,7 +148,7 @@ void stream_audio_to_server() {
     create_loop();
 }
 
-void stop_audio_from_mic(){
+void stop_stream_audio_to_server(){
     if (!play) return;
     g_main_loop_quit (loop);
 }
@@ -172,6 +171,8 @@ void init_gpio(){
 
 int main(int argc, char** argv)
 {
+    gst_init(&argc,&argv);
+
     struct sockaddr_in client;
     int read_size;
     int num_bytes_send;
@@ -192,7 +193,7 @@ int main(int argc, char** argv)
     client.sin_addr.s_addr = inet_addr("132.66.199.244");
     client.sin_port = htons( 5222 );
 
-    if (connect( socket_desc, (struct sockaddr *) &client, sizeof(client)) == 0){
+    if (connect( socket_desc, (struct sockaddr *) &client, sizeof(client)) == -1){
         perror("connection failed");
         return 1;
     };
@@ -276,7 +277,10 @@ int main(int argc, char** argv)
         digitalWrite(device_3, LOW);
         digitalWrite(device_4, LOW);
         printf("all gpio's set to zero\n");
+        stop_stream_audio_to_server();
     }
+
+    printf("Closing session\n");
 }
 
 
