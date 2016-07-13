@@ -136,5 +136,6 @@ void play_audio_from_mic() {
 
 void stop_audio_from_mic(){
     if (!play) return;
+    play = 0;
     g_main_loop_quit (loop);
 }

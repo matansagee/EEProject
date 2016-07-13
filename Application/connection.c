@@ -51,35 +51,6 @@ int connect_to_client()
     return 1;
 }
 
-
-/**
- * return message if o.k
- * NULL if failed
- */
-char* recvMessage() {
-
-    int read_size;
-    char* client_message = (char*) malloc(MAX_CHARACTERS_IN_STRING*sizeof(char));
-    if (client_message==NULL)
-    {
-        printf("failed allocating memmory.\n");
-        exit(1);
-    }
-    read_size = recv(socket_desc , client_message , MAX_CHARACTERS_IN_STRING , 0);
-
-    if(read_size == 0)
-    {
-        printf("server disconnected\n");
-        return NULL;
-    }
-    else if(read_size == -1)
-    {
-        printf("recv failed");
-        return NULL;
-    }
-    return client_message;
-}
-
 /**
  * return 1 if succeeded
  * 0 if failed

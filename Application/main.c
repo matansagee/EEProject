@@ -139,7 +139,12 @@ gboolean stop_device(GtkWidget *widget,gpointer data)
 
 void play_function(GtkWidget *widget,gpointer data)
 {
-    play_audio_from_mic();
+    if (connection_status() == 0){
+        gtk_label_set_text(GTK_LABEL(helpLabel), "please connect");
+        g_timeout_add_seconds (4, reset_help_label, (gpointer) helpLabel);
+    } else {
+        play_audio_from_mic();
+    }
 }
 
 void stop_function(GtkWidget *widget,gpointer data)
@@ -163,6 +168,7 @@ void connect_function(GtkWidget *widget,gpointer data)
         stop_device(buttonDevice2,NULL);
         stop_device(buttonDevice3,NULL);
         stop_device(buttonDevice4,NULL);
+        stop_audio_from_mic();
         disconnect();
         gtk_button_set_label(GTK_BUTTON(widget), "Connect");
     }

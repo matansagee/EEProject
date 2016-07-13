@@ -105,6 +105,7 @@ void *connection_handler(void *socket_desc)
 {
     //Get the socket descriptor
     int sock = *(int*)socket_desc;
+    printf("Number of active connections: %d\n",number_of_active_links);
 
     int read_size;
     char *message , client_message[2000];
@@ -135,18 +136,14 @@ void *connection_handler(void *socket_desc)
         memset(client_message, 0, 2000);
     }
 
-    if(read_size == 0)
+    if(read_size <= 0)
     {
-        puts("Client disconnected");
-        fflush(stdout);
-    }
-    else if(read_size == -1)
-    {
-        perror("connection closed");
+        printf("Client disconnected");
     }
 
     write(clients_sockets[1-id], "100:stop", strlen("100:stop"));
     number_of_active_links--;
+    printf("Number of active connections: %d\n",number_of_active_links);
     close(sock);
     return 0;
 }
