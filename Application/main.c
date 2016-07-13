@@ -155,6 +155,10 @@ void connect_function(GtkWidget *widget,gpointer data)
         gtk_button_set_label(GTK_BUTTON(widget), "Disconnect");
     } else {
         sendMessage("100:stop");
+        stop_device(buttonDevice1,NULL);
+        stop_device(buttonDevice2,NULL);
+        stop_device(buttonDevice3,NULL);
+        stop_device(buttonDevice4,NULL);
         disconnect();
         gtk_button_set_label(GTK_BUTTON(widget), "Connect");
     }
@@ -248,7 +252,10 @@ activate (GtkApplication *app,    gpointer        user_data)
     gtk_grid_attach (GTK_GRID (grid),buttonClose,0,6,2,1);
     gtk_grid_attach(GTK_GRID (grid),helpLabel,0,7,2,1);
     gtk_grid_attach(GTK_GRID (grid),clockLabel,0,8,2,1);
-
+    gtk_widget_set_size_request (buttonDevice1,100,10);
+    gtk_widget_set_size_request (buttonDevice2,100,10);
+    gtk_widget_set_size_request (buttonDevice3,100,10);
+    gtk_widget_set_size_request (buttonDevice4,100,10);
     g_signal_connect (buttonClose, "clicked", G_CALLBACK (connect_function), NULL);
     g_signal_connect_swapped (buttonClose, "clicked", G_CALLBACK (gtk_widget_destroy), window);
 
