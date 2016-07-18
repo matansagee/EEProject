@@ -12,6 +12,15 @@
 #include<unistd.h>    //write
 #include<pthread.h> //for threading , link with lpthread
 
+#ifndef	FALSE
+#define	FALSE	(0)
+#endif
+
+#ifndef	TRUE
+#define	TRUE	(!FALSE)
+#endif
+
+#define MAX_CHARACTERS_IN_STRING 256
 #define MAX_NUMBER_OF_ACTIVE_LINKS 2
 
 int volatile *clients_sockets;
@@ -74,7 +83,6 @@ int main(int argc , char *argv[])
             continue;
         }
 
-        clients_sockets[number_of_active_links++] = client_sock;
         if( pthread_create( &thread_id , NULL ,  connection_handler , (void*) &client_sock) < 0)
         {
             perror("could not create thread");
@@ -91,6 +99,7 @@ int main(int argc , char *argv[])
         perror("accept failed");
         return 1;
     }
+
     close(socket_desc);
     return 0;
 }
@@ -100,58 +109,128 @@ int main(int argc , char *argv[])
  * */
 void *connection_handler(void *socket_desc)
 {
-    //Get the socket descriptor
+    printf("New connection accepted\n");
     int sock = *(int*)socket_desc;
-
+    int status_check = 0;
     int read_size;
-    char message[30] , client_message[2000];
-    int id = number_of_active_links == 1 ? 0 : 1;
-    printf("New connection accepted, socket:%d\n",clients_sockets[1-id]);
+    int number_of_bytes_returned;
+    char* client_message;
+    int id;
+    struct timeval tv;
+    tv.tv_sec = 5;  /* 30 Secs Timeout */
+    tv.tv_usec = 0;  // Not init'ing this can cause strange errors
+
+    client_message = (char*) malloc(MAX_CHARACTERS_IN_STRING * sizeof(char));
+    if (client_message==NULL){
+        printf("allocating memory failed.\n");
+        exit(1);
+    }
+
+    if (setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (char *)&tv,sizeof(struct timeval)) == 0){
+        printf("Timeout on socket-%d created\n",sock);
+    } else {
+        perror("Timeout on socket- failed");
+        return 0;
+    }
+
+    read_size = recv(sock , client_message , MAX_CHARACTERS_IN_STRING , 0);
+
+    if(read_size > 0){
+        client_message[read_size] = '\0';
+        if (!strcmp(client_message,"client")){
+            printf("client connected to server\n");
+            number_of_active_links++;
+            clients_sockets[0] = sock;
+            id=0;
+            number_of_bytes_returned = write(clients_sockets[id], "connected", strlen("connected"));
+        } else if (!strcmp(client_message,"app")) {
+            printf("application connected to server\n");
+            number_of_active_links++;
+            clients_sockets[1] = sock;
+            id=1;
+            number_of_bytes_returned = write(clients_sockets[id], "connected", strlen("connected"));
+        } else {
+            return 0;
+        }
+    } else {
+        return 0;
+    }
+
+    if(number_of_bytes_returned <=0)
+    {
+        printf("%d:\tSend failed due to disconnected peer\n",id);
+        number_of_active_links--;
+        return 0;
+    }
+
+    memset(client_message, 0, MAX_CHARACTERS_IN_STRING);
     printf("Number of active connections: %d\n",number_of_active_links);
 
-    //Send number of active connection to client
-    snprintf(message, 30,"%d",number_of_active_links);
-    if (write(sock , message , strlen(message)) <= 0 ){
-        number_of_active_links--;
-        printf("Failed to send Number of active connections: %d\n",number_of_active_links);
-        close(sock);
-        return 0;
-    };
+    while(TRUE){
 
-    //Receive a message from client
-    while( (read_size = recv(sock , client_message , 2000 , 0)) > 0 )
-    {
-        //end of string marker
-        client_message[read_size] = '\0';
-
-        printf("message:%d->%d %s\n",clients_sockets[id],clients_sockets[1-id],client_message);
-
-        //Send the message back to client
-        if (number_of_active_links != 0)
+        while( (read_size = recv(clients_sockets[id] , client_message , MAX_CHARACTERS_IN_STRING , 0)) > 0 )
         {
-            snprintf(message, 30,"%d",number_of_active_links);
-            write(clients_sockets[id] , message , strlen(message));
-            if(write(clients_sockets[1-id] , client_message , strlen(client_message)) <= 0){
-                printf("Send failed due to disconnected client:%d\n",clients_sockets[1-id]);
-                break;
-            };
+            client_message[read_size] = '\0';
+            printf("%d:\tmessage:%s\n",id,client_message);
 
+            if (!strcmp(client_message,"live")){
+                status_check=0;
+            }
+            else if(!strcmp(client_message,"status")){
+                sprintf (client_message, "0:%d",number_of_active_links);
+                number_of_bytes_returned = write(clients_sockets[id] , client_message , strlen(client_message));
+                if (number_of_bytes_returned <=0 ){
+                    printf("%d:\tSend failed due to disconnected peer\n",id);
+                    break;
+                };
+            }
+            else if(number_of_active_links == MAX_NUMBER_OF_ACTIVE_LINKS){
+                number_of_bytes_returned = write(clients_sockets[1-id] , client_message , strlen(client_message));
+                if (number_of_bytes_returned <= 0) {
+                    printf("%d:\tSend failed due to disconnected opposite peer\n",id);
+                    break;
+                }
+
+            };
+            //clear the message buffer
+            memset(client_message, 0, MAX_CHARACTERS_IN_STRING);
         }
 
-        //clear the message buffer
-        memset(client_message, 0, 2000);
+        if(read_size == 0){
+            //The return value will be 0 when the peer has performed an orderly shutdown.
+            printf("%d:\tpeer performed an orderly shutdown.\n",id);
+            break;
+
+        }
+        if(number_of_bytes_returned <=0)
+        {
+            printf("%d:\tSend failed due to disconnected peer\n",id);
+            break;
+        }
+
+        if (id == 0) {
+            //if it's client socket - check if live.
+            printf("%d:\tSocket timeout reached\n",id);
+            printf("%d:\tcheck if client is live\n",id);
+
+            number_of_bytes_returned = write(clients_sockets[id], "status", strlen("status"));
+            if (number_of_bytes_returned <= 0) {
+                printf("%d:\tSend message to socket failed\n",id);
+                break;
+            }
+            if (number_of_bytes_returned == strlen("status")) {
+                status_check++;
+            }
+
+            if (status_check == 3) {
+                printf("%d:\tclient is not responding in the last %d sec\n",id, (int) tv.tv_sec * status_check);
+                break;
+            }
+        }
     }
 
-    if(read_size <= 0)
-    {
-        printf("Client:%d disconnected\n",clients_sockets[id]);
-    }
-
+    printf("%d:\tthread ended\n",id);
     number_of_active_links--;
-    if (number_of_active_links == 1) {
-        write(clients_sockets[1 - id], "100:stop", strlen("100:stop"));
-    }
-    printf("Number of active connections: %d\n",number_of_active_links);
     close(sock);
     return 0;
 }

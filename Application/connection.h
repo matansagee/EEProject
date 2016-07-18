@@ -13,5 +13,6 @@ int connect_to_client();
 void disconnect();
 int sendMessage(char* message);
 int connection_status();
+char* recvMessage();
 
 #endif //EEPROJECT_CONNECTION_H

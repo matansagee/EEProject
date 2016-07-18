@@ -316,7 +316,7 @@ activate (GtkApplication *app,    gpointer        user_data)
 
     /* set timeout */
     g_timeout_add (500, update_clock, (gpointer) clockLabel);
-    g_timeout_add (500, check_network_connectivity, (gpointer) buttonConnect);
+    g_timeout_add (5000, check_network_connectivity, (gpointer) buttonConnect);
 
     gtk_widget_show_all (window);
 }
