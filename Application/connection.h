@@ -5,9 +5,9 @@
 #ifndef EEPROJECT_CONNECTION_H
 #define EEPROJECT_CONNECTION_H
 
-
-
 #define MAX_CHARACTERS_IN_STRING 256
+#define MAX_NUMBER_OF_TO_ALLOWED 3
+
 void init_socket();
 int connect_to_client();
 void disconnect();
