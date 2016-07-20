@@ -83,6 +83,7 @@ int main(int argc, char **argv) {
     while (TRUE) {
         while ((read_size = recv(socket_desc, client_message, MAX_CHARACTERS_IN_STRING, 0)) > 0) {
             char *command, *arg;
+            to_counter = 0;
 
             client_message[read_size] = '\0';
             printf("incoming message: %s\n", client_message);
@@ -107,7 +108,6 @@ int main(int argc, char **argv) {
                 }
                 switch (atoi(command)) {
                     case 0:
-                        to_counter = 0;
                         if (atoi(arg) == 1) {
                             printf("\tapplication is not connected\n");
 //                    digitalWrite(connect_ind, LOW);
