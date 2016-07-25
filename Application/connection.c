@@ -171,13 +171,21 @@ void disconnect() {
 }
 
 int connection_status() {
-    printf("checking connection status\n");
-    if (connected && to_counter == MAX_NUMBER_OF_TO_ALLOWED) {
+    if(!connected) return connected;
+
+    printf("checking connection status - to_counter:%d\n",to_counter);
+    if (to_counter == MAX_NUMBER_OF_TO_ALLOWED) {
         disconnect();
         return connected;
     }
 
-    if (to_counter > 0 && sendMessage("status") == 0) {
+    if (to_counter == 0){
+        //in the first time that connection_status call, dont send message to server.
+        to_counter++;
+        return connected;
+    }
+
+    if (sendMessage("status") == 0) {
         return connected;
     };
 

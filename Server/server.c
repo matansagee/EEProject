@@ -166,7 +166,7 @@ void *connection_handler(void *socket_desc) {
                     break;
                 };
             }
-            else if (number_of_active_links == MAX_NUMBER_OF_ACTIVE_LINKS) {
+            else if (number_of_active_links == MAX_NUMBER_OF_ACTIVE_LINKS && strcmp(client_message,"live")) {
                 number_of_bytes_returned = write(clients_sockets[1 - id], client_message, strlen(client_message));
                 if (number_of_bytes_returned <= 0) {
                     printf("%d:\tSend failed due to disconnected opposite peer\n", id);
