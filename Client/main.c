@@ -23,12 +23,12 @@ const int connect_ind = 21;
 
 void init_gpio() {
 //    wiringPiSetup();  //Intalized wiringPi's simlified number system
-//    wiringPiSetupGpio();
-//    pinMode (device_1, OUTPUT);
-//    pinMode (device_2, OUTPUT);
-//    pinMode (device_3, OUTPUT);
-//    pinMode (device_4, OUTPUT);
-//    pinMode (connect_ind, OUTPUT);
+    wiringPiSetupGpio();
+    pinMode(device_1, OUTPUT);
+    pinMode(device_2, OUTPUT);
+    pinMode(device_3, OUTPUT);
+    pinMode(device_4, OUTPUT);
+    pinMode(connect_ind, OUTPUT);
 }
 
 int main(int argc, char **argv) {
@@ -110,52 +110,52 @@ int main(int argc, char **argv) {
                     case 0:
                         if (atoi(arg) == 1) {
                             printf("\tapplication is not connected\n");
-//                    digitalWrite(connect_ind, LOW);
-//                    digitalWrite(device_1, LOW);
-//                    digitalWrite(device_2, LOW);
-//                    digitalWrite(device_3, LOW);
-//                    digitalWrite(device_4, LOW);
+                            digitalWrite(connect_ind, LOW);
+                            digitalWrite(device_1, LOW);
+                            digitalWrite(device_2, LOW);
+                            digitalWrite(device_3, LOW);
+                            digitalWrite(device_4, LOW);
                         } else {
                             printf("\tapplication is connected\n");
                         }
                         break;
                     case 100:
                         if (!strcmp(arg, "start")) {
-//                    digitalWrite(connect_ind, HIGH);
+                            digitalWrite(connect_ind, HIGH);
                         } else if (!strcmp(arg, "stop")) {
-//                    digitalWrite(connect_ind, LOW);
-//                    digitalWrite(device_1, LOW);
-//                    digitalWrite(device_2, LOW);
-//                    digitalWrite(device_3, LOW);
-//                    digitalWrite(device_4, LOW);
+                            digitalWrite(connect_ind, LOW);
+                            digitalWrite(device_1, LOW);
+                            digitalWrite(device_2, LOW);
+                            digitalWrite(device_3, LOW);
+                            digitalWrite(device_4, LOW);
                         }
                         break;
                     case 1:
                         if (!strcmp(arg, "start")) {
-//                    digitalWrite(device_1, HIGH);
+                            digitalWrite(device_1, HIGH);
                         } else if (!strcmp(arg, "stop")) {
-//                    digitalWrite(device_1, LOW);
+                            digitalWrite(device_1, LOW);
                         }
                         break;
                     case 2:
                         if (!strcmp(arg, "start")) {
-//                    digitalWrite(device_2, HIGH);
+                            digitalWrite(device_2, HIGH);
                         } else if (!strcmp(arg, "stop")) {
-//                    digitalWrite(device_2, LOW);
+                            digitalWrite(device_2, LOW);
                         }
                         break;
                     case 3:
                         if (!strcmp(arg, "start")) {
-//                    digitalWrite(device_3, HIGH);
+                            digitalWrite(device_3, HIGH);
                         } else if (!strcmp(arg, "stop")) {
-//                    digitalWrite(device_3, LOW);
+                            digitalWrite(device_3, LOW);
                         }
                         break;
                     case 4:
                         if (!strcmp(arg, "start")) {
-//                    digitalWrite(device_4, HIGH);
+                            digitalWrite(device_4, HIGH);
                         } else if (!strcmp(arg, "stop")) {
-//                    digitalWrite(device_4, LOW);
+                            digitalWrite(device_4, LOW);
                         }
                         break;
                     default:
@@ -194,11 +194,11 @@ int main(int argc, char **argv) {
     }
 
     printf("session terminated\n");
-//    digitalWrite(connect_ind, LOW);
-//    digitalWrite(device_1, LOW);
-//    digitalWrite(device_2, LOW);
-//    digitalWrite(device_3, LOW);
-//    digitalWrite(device_4, LOW);
+    digitalWrite(connect_ind, LOW);
+    digitalWrite(device_1, LOW);
+    digitalWrite(device_2, LOW);
+    digitalWrite(device_3, LOW);
+    digitalWrite(device_4, LOW);
     printf("all gpio's set to zero\n");
     printf("Closing session\n");
     close(socket_desc);
