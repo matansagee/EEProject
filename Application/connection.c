@@ -14,7 +14,7 @@
 int socket_desc;
 int connected = 0;
 struct sockaddr_in client;
-int check_status=0;
+int to_counter = 0;
 
 /**
  * connect to client function
@@ -23,12 +23,11 @@ int check_status=0;
  * @return 0 - failed
  */
 
-void init_socket()
-{
+void init_socket() {
     //Prepare the sockaddr_in structure
     client.sin_family = AF_INET;
     client.sin_addr.s_addr = inet_addr("132.66.199.244");
-    client.sin_port = htons( 5222);
+    client.sin_port = htons(5222);
 }
 
 int connect_to_client() {
@@ -37,25 +36,11 @@ int connect_to_client() {
     printf("starting connect process\n");
     socket_desc = socket(AF_INET, SOCK_STREAM, 0);
     int read_size;
-    char* in_message = (char*) malloc(MAX_CHARACTERS_IN_STRING*sizeof(char*));
+    char *in_message = (char *) malloc(MAX_CHARACTERS_IN_STRING * sizeof(char *));
 
-    if (in_message==NULL){
+    if (in_message == NULL) {
         printf("error allocating memory\n");
         exit(1);
-    }
-
-    tv.tv_sec = 5;  /* 30 Secs Timeout */
-    tv.tv_usec = 0;  // Not init'ing this can cause strange errors
-
-    if (setsockopt(socket_desc, SOL_SOCKET, SO_RCVTIMEO, (char *)&tv,sizeof(struct timeval)) == 0){
-        printf("Timeout on socket-%d created\n",socket_desc);
-    } else {
-        perror("Timeout on socket- failed");
-        return 1;
-    }
-
-    if (socket_desc == -1) {
-        printf("Could not create socket");
     }
 
     if (connect(socket_desc, (struct sockaddr *) &client, sizeof(client)) == -1) {
@@ -67,6 +52,20 @@ int connect_to_client() {
         return 0;
     }
 
+    tv.tv_sec = 5;  /* 30 Secs Timeout */
+    tv.tv_usec = 0;  // Not init'ing this can cause strange errors
+
+    if (setsockopt(socket_desc, SOL_SOCKET, SO_RCVTIMEO, (char *) &tv, sizeof(struct timeval)) == 0) {
+        printf("Timeout on socket-%d created\n", socket_desc);
+    } else {
+        perror("Timeout on socket- failed");
+        return 1;
+    }
+
+    if (socket_desc == -1) {
+        printf("Could not create socket");
+    }
+
     int number_of_bytes_returned = write(socket_desc, "app", strlen("app"));
 
     if (number_of_bytes_returned <= 0) {
@@ -74,19 +73,19 @@ int connect_to_client() {
         return 0;
     }
 
-    read_size = recv(socket_desc , in_message , MAX_CHARACTERS_IN_STRING , 0);
+    read_size = recv(socket_desc, in_message, MAX_CHARACTERS_IN_STRING, 0);
     in_message[read_size] = '\0';
 
-    if (read_size<=0){
+    if (read_size <= 0) {
         printf("connection failed\n");
         close(socket_desc);
         connected = 0;
         return connected;
     }
-    printf("%s\n",in_message);
-    if (strcmp(in_message,"connected")){
+    printf("%s\n", in_message);
+    if (strcmp(in_message, "connected")) {
         printf("app is not connected to server");
-        connected=0;
+        connected = 0;
         return connected;
     }
 
@@ -96,10 +95,10 @@ int connect_to_client() {
         return 0;
     }
 
-    read_size = recv(socket_desc , in_message , MAX_CHARACTERS_IN_STRING , 0);
+    read_size = recv(socket_desc, in_message, MAX_CHARACTERS_IN_STRING, 0);
     in_message[read_size] = '\0';
 
-    if (read_size<=0){
+    if (read_size <= 0) {
         printf("connection failed\n");
         close(socket_desc);
         connected = 0;
@@ -122,7 +121,7 @@ int connect_to_client() {
  * return 1 if succeeded
  * 0 if failed
  */
-int sendMessage(char* message) {
+int sendMessage(char *message) {
 
     if (!connected) return 0;
     int number_of_bytes_returned = write(socket_desc, message, strlen(message));
@@ -132,26 +131,27 @@ int sendMessage(char* message) {
     }
     return (number_of_bytes_returned == strlen(message));
 }
-char* recvMessage(){
+
+char *recvMessage() {
     if (!connected) return NULL;
 
     int read_size;
-    char* in_message = (char*) malloc(MAX_CHARACTERS_IN_STRING*sizeof(char*));
+    char *in_message = (char *) malloc(MAX_CHARACTERS_IN_STRING * sizeof(char *));
 
-    if (in_message==NULL){
+    if (in_message == NULL) {
         printf("error allocating memory\n");
         exit(1);
     }
 
-    read_size = recv(socket_desc , in_message , MAX_CHARACTERS_IN_STRING , 0);
+    read_size = recv(socket_desc, in_message, MAX_CHARACTERS_IN_STRING, 0);
 
-    if(read_size == 0){
+    if (read_size == 0) {
         //The return value will be 0 when the peer has performed an orderly shutdown.
         printf("peer performed an orderly shutdown\n");
         disconnect();
         return NULL;
 
-    } else if (read_size == -1){
+    } else if (read_size == -1) {
         printf("connection failed\n");
         disconnect();
         return NULL;
@@ -162,28 +162,37 @@ char* recvMessage(){
 }
 
 
-void disconnect(){
-    if(!connected) return;
+void disconnect() {
+    if (!connected) return;
     printf("closing socket\n");
-    check_status=0;
+    to_counter = 0;
     connected = 0;
     close(socket_desc);
 }
 
-int connection_status(){
-    if(connected && check_status == 3){
+int connection_status() {
+    printf("checking connection status\n");
+    if (connected && to_counter == MAX_NUMBER_OF_TO_ALLOWED) {
         disconnect();
         return connected;
     }
 
-    if (sendMessage("status") == 0 ){
+    if (sendMessage("status") == 0) {
         return connected;
     };
 
-    if (recvMessage() == NULL) {
-        check_status++;
+    char *in_message = recvMessage();
+    if (in_message == NULL) {
+        to_counter++;
     } else {
-        check_status=0;
+        printf("incoming message from server: %s\n", in_message);
+        if (!strcmp(in_message, "0:1")) {
+            printf("client is not connected\n");
+            disconnect();
+        } else if (!strcmp(in_message, "0:2")) {
+            printf("client is connected\n");
+        }
+        to_counter = 0;
     }
 
     return connected;
