@@ -26,7 +26,7 @@ int to_counter = 0;
 void init_socket() {
     //Prepare the sockaddr_in structure
     client.sin_family = AF_INET;
-    client.sin_addr.s_addr = inet_addr("10.0.0.1");//("132.66.199.244");
+    client.sin_addr.s_addr = inet_addr("132.66.199.244");
     client.sin_port = htons(5222);
 }
 
@@ -43,6 +43,15 @@ int connect_to_client() {
         exit(1);
     }
 
+    if (connect(socket_desc, (struct sockaddr *) &client, sizeof(client)) == -1) {
+        perror("connection failed");
+        return 0;
+    };
+    if (socket_desc == 0) {
+        perror("socket failed");
+        return 0;
+    }
+
     tv.tv_sec = 5;  /* 30 Secs Timeout */
     tv.tv_usec = 0;  // Not init'ing this can cause strange errors
 
@@ -55,15 +64,6 @@ int connect_to_client() {
 
     if (socket_desc == -1) {
         printf("Could not create socket");
-    }
-
-    if (connect(socket_desc, (struct sockaddr *) &client, sizeof(client)) == -1) {
-        perror("connection failed");
-        return 0;
-    };
-    if (socket_desc == 0) {
-        perror("socket failed");
-        return 0;
     }
 
     int number_of_bytes_returned = write(socket_desc, "app", strlen("app"));

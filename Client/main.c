@@ -57,7 +57,7 @@ int main(int argc, char **argv) {
     }
 
     client.sin_family = AF_INET;
-    client.sin_addr.s_addr = inet_addr("10.0.0.1");//("127.0.0.1");//("132.66.199.244");
+    client.sin_addr.s_addr = inet_addr("132.66.199.244");
     client.sin_port = htons(5222);
 
     printf("trying to connect\n");

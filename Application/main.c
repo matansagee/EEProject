@@ -48,7 +48,7 @@ void button_function(GtkWidget *widget,gpointer data)
     char* label_string = gtk_button_get_label(widget);
 
     if (connection_status() == 0){
-        gtk_label_set_text(GTK_LABEL(helpLabel), "please connect before turning on device");
+        gtk_label_set_text(GTK_LABEL(helpLabel), "please connect");
         g_timeout_add_seconds (4, reset_help_label, (gpointer) helpLabel);
         return;
     }
@@ -182,7 +182,7 @@ void connect_function(GtkWidget *widget,gpointer data)
     if (connection_status() == 0) {
         if (connect_to_client() == 0){
             gtk_button_set_label(GTK_BUTTON(widget), "Connect");
-            gtk_label_set_text(GTK_LABEL(helpLabel), "client is not responding");
+            gtk_label_set_text(GTK_LABEL(helpLabel), "client offline");
             g_timeout_add_seconds (4, reset_help_label, (gpointer) helpLabel);
             return;
         } else {
@@ -244,7 +244,7 @@ activate (GtkApplication *app,    gpointer        user_data)
 
     window = gtk_application_window_new (app);
     gtk_window_set_title (GTK_WINDOW (window), "Smart House");
-    gtk_window_set_default_size (GTK_WINDOW (window), 200, 200);
+    gtk_window_set_default_size (GTK_WINDOW (window), -1, -1);
 
     clockLabel = gtk_label_new (NULL);
     helpLabel = gtk_label_new ("help");
@@ -283,20 +283,25 @@ activate (GtkApplication *app,    gpointer        user_data)
 
 
     grid = gtk_grid_new();
-    gtk_grid_attach (GTK_GRID (grid),buttonConnect,0,0,2,1);
-    gtk_grid_attach (GTK_GRID (grid),buttonPlay,0,1,1,1);
-    gtk_grid_attach_next_to(GTK_GRID (grid),buttonStop,buttonPlay,GTK_POS_RIGHT,1,1);
-    gtk_grid_attach (GTK_GRID (grid),buttonDevice1,0,2,1,1);
-    gtk_grid_attach (GTK_GRID (grid),buttonDevice2,0,3,1,1);
-    gtk_grid_attach (GTK_GRID (grid),buttonDevice3,0,4,1,1);
-    gtk_grid_attach (GTK_GRID (grid),buttonDevice4,0,5,1,1);
-    gtk_grid_attach (GTK_GRID (grid), spinButtonDevice1, 1, 2, 1, 1);
-    gtk_grid_attach (GTK_GRID (grid), spinButtonDevice2, 1, 3, 1, 1);
-    gtk_grid_attach (GTK_GRID (grid), spinButtonDevice3, 1, 4, 1, 1);
-    gtk_grid_attach (GTK_GRID (grid), spinButtonDevice4, 1, 5, 1, 1);
-    gtk_grid_attach (GTK_GRID (grid),buttonClose,0,6,2,1);
-    gtk_grid_attach(GTK_GRID (grid),helpLabel,0,7,2,1);
-    gtk_grid_attach(GTK_GRID (grid),clockLabel,0,8,2,1);
+    gtk_grid_attach (GTK_GRID (grid),buttonConnect,0,0,1,1);
+    gtk_grid_attach (GTK_GRID (grid),clockLabel,1,0,2,1);
+//    gtk_grid_attach_next_to(GTK_GRID (grid),clockLabel,buttonConnect,GTK_POS_RIGHT,1,1);
+    gtk_grid_attach (GTK_GRID (grid),buttonPlay,2,1,1,1);
+    gtk_grid_attach (GTK_GRID (grid),buttonStop,2,2,1,1);
+    gtk_grid_attach (GTK_GRID (grid),buttonClose,2,3,1,1);
+//    gtk_grid_attach_next_to(GTK_GRID (grid),buttonStop,buttonPlay,GTK_POS_RIGHT,1,1);
+    gtk_grid_attach (GTK_GRID (grid),buttonDevice1,0,1,1,1);
+    gtk_grid_attach (GTK_GRID (grid),buttonDevice2,0,2,1,1);
+    gtk_grid_attach (GTK_GRID (grid),buttonDevice3,0,3,1,1);
+    gtk_grid_attach (GTK_GRID (grid),buttonDevice4,0,4,1,1);
+    gtk_grid_attach (GTK_GRID (grid), spinButtonDevice1, 1, 1, 1, 1);
+    gtk_grid_attach (GTK_GRID (grid), spinButtonDevice2, 1, 2, 1, 1);
+    gtk_grid_attach (GTK_GRID (grid), spinButtonDevice3, 1, 3, 1, 1);
+    gtk_grid_attach (GTK_GRID (grid), spinButtonDevice4, 1, 4, 1, 1);
+//    gtk_grid_attach (GTK_GRID (grid),buttonClose,0,6,1,1);
+//    gtk_grid_attach_next_to(GTK_GRID (grid),helpLabel,buttonClose,GTK_POS_RIGHT,1,1);
+    gtk_grid_attach(GTK_GRID (grid),helpLabel,0,5,3,1);
+//    gtk_grid_attach(GTK_GRID (grid),clockLabel,0,8,2,1);
     gtk_widget_set_size_request (buttonDevice1,100,10);
     gtk_widget_set_size_request (buttonDevice2,100,10);
     gtk_widget_set_size_request (buttonDevice3,100,10);
