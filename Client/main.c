@@ -6,7 +6,7 @@
 #include <netinet/in.h>
 #include <string.h>
 #include <arpa/inet.h>
-//#include <wiringPi.h>
+#include <wiringPi.h>
 #include <glib.h>
 #include <gtk/gtk.h>
 
