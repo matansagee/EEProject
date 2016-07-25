@@ -195,7 +195,7 @@ void *connection_handler(void *socket_desc) {
             break;
         }
 
-        if (id == 0) {
+        if (id == 0 && to_counter > 0) {
             //if it's client socket - check if live.
             printf("%d:\tcheck if client is live\n",id);
 
