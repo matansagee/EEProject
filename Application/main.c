@@ -43,6 +43,8 @@ int device2_on =0;
 int device3_on =0;
 int device4_on =0;
 
+int connect_bool = 0;
+
 void button_function(GtkWidget *widget,gpointer data)
 {
     char* label_string = gtk_button_get_label(widget);
@@ -179,27 +181,32 @@ void stop_function(GtkWidget *widget,gpointer data)
 
 void connect_function(GtkWidget *widget,gpointer data)
 {
-    if (connection_status() == 0) {
-        if (connect_to_client() == 0){
+    if(!connect_bool && connection_status() == 0) {
+        if (connect_to_client() == 0) {
             gtk_button_set_label(GTK_BUTTON(widget), "Connect");
             gtk_label_set_text(GTK_LABEL(helpLabel), "client offline");
-            g_timeout_add_seconds (4, reset_help_label, (gpointer) helpLabel);
+            g_timeout_add_seconds(4, reset_help_label, (gpointer) helpLabel);
             return;
         } else {
             sendMessage("100:start");
             gtk_button_set_label(GTK_BUTTON(widget), "Disconnect");
+            connect_bool = 1;
         }
     } else {
+        connect_bool = 0;
         sendMessage("100:stop");
-        stop_device(buttonDevice1,NULL);
-        stop_device(buttonDevice2,NULL);
-        stop_device(buttonDevice3,NULL);
-        stop_device(buttonDevice4,NULL);
+        gtk_button_set_label(GTK_BUTTON(buttonDevice1), "Device1");
+        gtk_button_set_label(GTK_BUTTON(buttonDevice2), "Device2");
+        gtk_button_set_label(GTK_BUTTON(buttonDevice3), "Device3");
+        gtk_button_set_label(GTK_BUTTON(buttonDevice4), "Device4");
         stop_audio_from_mic();
         disconnect();
         gtk_button_set_label(GTK_BUTTON(widget), "Connect");
     }
 }
+
+
+
 
 gboolean reset_help_label(gpointer label){
     gtk_label_set_text(GTK_LABEL(label),"");

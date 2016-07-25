@@ -177,7 +177,7 @@ int connection_status() {
         return connected;
     }
 
-    if (sendMessage("status") == 0) {
+    if (to_counter > 0 && sendMessage("status") == 0) {
         return connected;
     };
 

@@ -181,16 +181,19 @@ int main(int argc, char **argv) {
         printf("Socket timeout reached,check if server is live\n");
         to_counter++;
 
-        number_of_bytes_returned = write(socket_desc, "status", strlen("status"));
-        if (number_of_bytes_returned <= 0) {
-            printf("Send message to socket failed\n");
-            break;
-        }
-
         if (to_counter == MAX_NUMBER_OF_TO_ALLOWED) {
             printf("server is not responding in the last %d sec\n", (int) tv.tv_sec * to_counter);
             break;
         }
+
+        if (to_counter > 0) {
+            number_of_bytes_returned = write(socket_desc, "status", strlen("status"));
+            if (number_of_bytes_returned <= 0) {
+                printf("Send message to socket failed\n");
+                break;
+            }
+        }
+
     }
 
     printf("session terminated\n");
